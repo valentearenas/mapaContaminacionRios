@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cómo Usar</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            min-height: 100vh;
+            max-height: 100vh;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+        }
+        .menu-superior {
+            width: 100%;
+            background: #0E51FA;
+            color: #fff;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            flex-shrink: 0;
+        }
+        .logo-menu {
+            padding: 10px 30px;
+            display: flex;
+            align-items: center;
+        }
+        .logo-menu img {
+            width: 70px;
+            height: auto;
+            display: block;
+        }
+        .menu-superior nav ul {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0 30px 0 0;
+        }
+        .menu-superior nav ul li {
+            margin: 0 20px;
+        }
+        .menu-superior nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding: 20px 0;
+            display: block;
+            transition: background 0.2s, color 0.2s;
+        }
+        .menu-superior nav ul li a:hover {
+            color: #00FA0E;
+        }
+        .contenedor-informacion {
+            max-width: 900px;
+            width: 100%;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            flex: 1 1 auto;
+            max-height: calc(100vh - 40px - 70px);
+            overflow: auto;
+        }
+        .logo {
+            margin-bottom: 20px;
+        }
+        .logo img {
+            width: 90px;
+            height: auto;
+        }
+        .txt-sobre-pagina {
+            font-size: 0.95rem;
+            color: #333;
+            max-width: 600px;
+            text-align: center;
+            background: #f9f9f9;
+            padding: 15px 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .pasos-lista {
+            text-align: left;
+            margin: 0 auto;
+            padding: 0;
+            max-width: 500px;
+        }
+        .pasos-lista li {
+            margin-bottom: 14px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            list-style: none;
+            position: relative;
+            padding-left: 32px;
+        }
+        .pasos-lista li::before {
+            content: attr(data-icon);
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 1.2em;
+        }
+        .pasos-titulo {
+            color: #0E51FA;
+            font-size: 1.05rem;
+            margin-bottom: 10px;
+            margin-top: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-superior">
+        <div class="logo-menu">
+            <img src="logo.png" alt="LOGO" />
+        </div>
+        <nav>
+            <ul>
+                <li>
+                    <a href="mapaContaminacion.html">MAPA</a>
+                </li>
+                <li>
+                    <a href="comoUsar.html">CÓMO USAR</a>
+                </li>
+                <li>
+                    <a href="tabla.php">TABLA RIOS</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <div class="contenedor-informacion">
+        <div class="logo">
+            <img src="logo.png" alt="LOGO">
+        </div>
+        <div class="txt-sobre-pagina">
+            <h2 style="color:#0096FA; margin-top:0; font-size:1.1rem;">¿Cómo usar la plataforma?</h2>
+            <ul class="pasos-lista">
+                <li data-icon="🗺️">
+                    <span class="pasos-titulo">1. Explora el mapa interactivo</span><br>
+                    Navega por el mapa para localizar ríos, lagos y cuerpos de agua cercanos a tu zona.
+                </li>
+                <li data-icon="➕">
+                    <span class="pasos-titulo">2. Ingresa datos de calidad del agua</span><br>
+                    Haz clic en el cuerpo de agua de tu interés y registra los niveles de <b>pH</b> u otros parámetros que hayas medido.
+                </li>
+                <li data-icon="📊">
+                    <span class="pasos-titulo">3. Consulta la base de datos</span><br>
+                    Visualiza los datos colaborativos de la comunidad para conocer el estado actual del agua en diferentes lugares.
+                </li>
+                <li data-icon="🧪">
+                    <span class="pasos-titulo">4. Aprende a filtrar el agua</span><br>
+                    Si detectas contaminación, accede a las guías para construir <b>filtros caseros</b> o consulta opciones de compra de filtros profesionales.
+                </li>
+                <li data-icon="🤝">
+                    <span class="pasos-titulo">5. Comparte y participa</span><br>
+                    Invita a otros usuarios a sumarse, comparte tus resultados y ayuda a crear una red de monitoreo y acción por el agua.
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

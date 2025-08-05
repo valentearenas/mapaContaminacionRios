@@ -1,0 +1,551 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>RiTec</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #map { height: 400px; }
+        #canvas { display: none; }
+    </style>
+</head>
+<body class="bg-light text-center p-4">
+    <!--Div principal-->
+    <div>
+        <!--Div para titulo de la pagina-->
+        <div class="card shadow p-4 text-center">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                <a href="http://localhost/hackatec/index.html">
+                    <img src="logo.png" alt="Logo RiTec" style="height: 80px; border:1px solid #ccc; border-radius:10px; cursor:pointer;">
+                </a>
+            </div>
+            <p class="text-muted mt-3">Los ríos se muestran en colores según su nivel de contaminación</p>
+        </div>
+
+        <p></p>
+
+        <!--Div para la ubicacion y nivel de contaminacion-->
+        <div class="d-flex justify-content-center mb-3 gap-3">
+            <h3 id="ubicacion" class="alert alert-info mb-0">Tu ubicacion</h3>
+            <button class="btn btn-success" onclick="obtenerUbi()">Obtener tu ubicacion</button>
+        </div>
+
+        <p></p>
+
+
+        <!--Div para el mapa -->
+        <div id="mapa" style="height: 400px; width: 100%;"></div>
+
+        
+    <!--Div para mostrar el tipo de filtro despues de ingresar el ph-->
+    <div id="resultado-ph" style="display:none; padding: 20px; background: #f9f9f9; border: 2px solid #333; border-radius: 10px; max-width: 1200px; margin: 20px auto;">
+        <h2 id="titulo-rio"></h2>
+        <p id="descripcion-ph"></p>
+
+
+    <!-- Mostrar las etapas primero -->
+    <div id="imagenes-etapas" style="max-width: 600px; margin: 0 auto 40px auto;"></div>
+
+
+    <!-- Luego el video explicativo y la compra debajo -->
+    <div style="max-width: 600px; margin: 0 auto;">
+
+        <!-- Video explicativo -->
+    <div id="video-explicativo" style="margin-bottom: 20px;">
+        <p class="alert alert-info p-2">A continuación, te mostramos cómo funciona el sistema de filtros recomendado para tu nivel de pH.</p>
+        <h5>Cómo funciona el kit de filtros:</h5>
+        <video id="video-filtrado" controls width="350" style="border-radius: 10px; border: 1px solid #ccc; max-width: 100%; display: block; margin: 0 auto;">
+            <source id="video-source" src="videos/filtrado.mp4" type="video/mp4">
+            Tu navegador no soporta video HTML5.
+        </video>
+        <!--<button id="alternar-video" class="btn btn-primary btn-sm mt-2">Ver otro video</button>-->
+    </div>
+
+
+
+    <div id="kit-compra" style="background: #fff; padding: 15px; border-radius: 10px; border: 1px solid #ccc; text-align: center;">
+        <h5>Adquiere el sistema de filtros recomendado:</h5>
+        <img id="imagen-kit" src="imagenes/kit_default.jpg" alt="Kit de filtros" style="width:100%; max-width:300px; border-radius:10px; border:1px solid #ccc; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto;">
+        <button id="boton-compra" class="btn btn-success mt-3" style="display: inline-block; margin-top: 10px;" disabled>Comprar Kit</button>
+        <div id="mensaje-kit" class="text-secondary mt-2" style="font-size: 0.95rem;">Próximamente</div>
+    </div>
+
+    </div>
+
+        <button class="btn btn-secondary mt-4" onclick="document.getElementById('resultado-ph').style.display='none'">Cerrar</button>
+    </div>
+
+    </div>
+
+    <!-- Modal para subir imagen de tira de pH -->
+    <div id="modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
+        <div style="background:#fff; padding:20px; border-radius:8px; min-width:250px; max-width:90vw; text-align:center; position:relative;">
+            <span id="cerrarModal" style="position:absolute; top:10px; right:15px; cursor:pointer; font-size:20px;">&times;</span>
+            <h2>📷 Subir imagen de tira de pH</h2>
+            <input type="file" id="imgInput" accept="image/*">
+            <br>
+            <img id="preview" src="#" alt="Vista previa" style="display:none; max-width:200px; margin-top:10px;">
+            <canvas id="canvas"></canvas>
+            <div id="contenidoModal" style="margin-top:15px;"></div>
+            <button id="usarPH" class="btn btn-primary mt-3" style="display:none;">Usar este pH</button>
+        </div>
+    </div>
+
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let ubicacion;
+        let latitud, longitud;
+        var map = L.map('mapa'); // Crear mapa y lo agrega al div
+
+        //guarda las etiquetas en el script, para modificarlas
+        const etiquetaUbi = document.getElementById("ubicacion");
+        const etiquetaNivelConta = document.getElementById("nivelContaminacion");
+
+        // Función para generar un nivel de contaminación aleatorio para cada río (simulación)
+        function obtenerNivelContaminacion(nombreRio) {
+            const hash = nombreRio.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            const nivel = hash % 4;
+            return {
+                nivel: nivel,
+                color: ['#28a745', '#ffc107', '#fd7e14', '#dc3545'][nivel], // Verde, Amarillo, Naranja, Rojo
+                descripcion: ['Baja contaminación', 'Contaminación moderada', 'Alta contaminación', 'Contaminación muy alta'][nivel],
+                phPromedio: [7.5, 6.5, 5.5, 4.5][nivel] // Valores de pH promedio según contaminación
+            };
+        }
+
+        // Al iniciar la pag, muestra el mapa con ubi en CDMX
+        window.onload = function() {
+            buscar(19.4326, -99.1332);
+        };
+
+        function obtenerUbi() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function (position) {
+                        latitud = position.coords.latitude;
+                        longitud = position.coords.longitude;
+                        etiquetaUbi.textContent = latitud + "," + longitud;
+                        buscar(latitud, longitud);
+                        mapaRios(latitud, longitud);
+                    },
+                    function (error) {
+                        console.error("Error al obtener la ubicacion:", error.message);
+                    }
+                );
+            } else {
+                console.error("La ubicacion no esta soportada en este navegador");
+            }
+        }
+
+        //metodo que recibe lat y long y lo ubica en el mapa
+        function buscar(latitud, longitud) {
+            var lat = parseFloat(latitud);
+            var lng = parseFloat(longitud);
+
+            if (isNaN(lat) || isNaN(lng)) {
+                console.error("Coordenadas invalidas");
+                return;
+            }
+
+            map.setView([lat, lng], 13);
+
+            // Cargar tiles de OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Marcador
+            L.marker([lat, lng]).addTo(map)
+                .bindPopup('¡Tu ubicación actual!')
+                .openPopup();
+        }
+
+        function mapaRios(latitud, longitud) {
+            fetch('rios_veracruz1.json')
+                .then(res => res.json())
+                .then(data => {
+                    // Filtrar ríos
+                    const rios = data.features.filter(feature =>
+                        feature.properties.GEOGRAFICO === "Corriente de Agua" &&
+                        feature.properties.AMBITO === "R"
+                    );
+
+                    // Filtrar lagunas
+                    const lagunas = data.features.filter(feature =>
+                        feature.properties.GEOGRAFICO === "Laguna" &&
+                        feature.properties.AMBITO === "L"
+                    );
+
+                    // Fusionar ríos y lagunas
+                    const cuerposAgua = {
+                        type: "FeatureCollection",
+                        features: [...rios, ...lagunas]
+                    };
+
+                    const capasAgua = L.geoJSON(cuerposAgua, {
+                        style: function (feature) {
+                            // Todos los ríos y lagunas se pintan de azul
+                            return {
+                                color: '#007bff', // Azul Bootstrap
+                                weight: 5,
+                                opacity: 0.8
+                            };
+                        },
+                        onEachFeature: function (feature, layer) {
+                            let nombre = feature.properties.NOMBRE || "Sin nombre";
+                            let prefijo = feature.properties.GEOGRAFICO === "Lagunas" ? "" : "";
+                            const nombreCompleto = prefijo + nombre;
+
+                            layer.bindPopup(`<b>${nombreCompleto}</b>
+                                <button class="btn btn-sm btn-primary mt-2" onclick="valorPH('${nombre}', 7)">Ingresar valor de pH</button>`);
+                        }
+                    }).addTo(map);
+                })
+                .catch(error => {
+                    console.error("Error al cargar los datos de ríos y lagunas:", error);
+                });
+        }
+
+        // --- pH Modal y procesamiento ---
+        let nombreRioSeleccionado = "";
+        let phIngresado = null;
+        let phDetectado = null;
+
+        function valorPH(nombreRio, phEstimado) {
+            nombreRioSeleccionado = nombreRio;
+            phIngresado = null;
+            phDetectado = null;
+
+            // 1. Pedir el valor de pH en enteros
+            let valor = prompt(`Has seleccionado el ${nombreRio}.\nIntroduce el valor de pH medido (entero de 1 a 14):\n(pH estimado: ${phEstimado.toFixed(1)})`);
+            if (valor === null) return; // Cancelado
+
+            valor = valor.trim();
+            if (valor !== "") {
+                const ph = parseInt(valor, 10);
+                if (!isNaN(ph) && ph >= 1 && ph <= 14) {
+                    phIngresado = ph;
+                    // 2. Ahora pide la foto
+                    abrirModalPH();
+                    return;
+                } else {
+                    alert("Valor inválido. Debe ser un número entero entre 1 y 14.");
+                    return;
+                }
+            }
+        }
+
+        function abrirModalPH() {
+            document.getElementById('modal').style.display = "flex";
+            document.getElementById('imgInput').value = "";
+            document.getElementById('preview').style.display = "none";
+            document.getElementById('contenidoModal').innerHTML = `
+                <div class="text-muted">
+                <b>Río/Laguna seleccionado:</b> <span style="color:#007bff">${nombreRioSeleccionado}</span><br>
+                Selecciona una foto de la tira de pH.<br>
+                Tu valor ingresado fue: <b>${phIngresado}</b>
+                </div>`;
+                document.getElementById('usarPH').style.display = "none";
+        }
+
+        document.getElementById('cerrarModal').onclick = function () {
+            document.getElementById('modal').style.display = "none";
+        };
+
+        document.getElementById('modal').onclick = function (e) {
+            if (e.target === this) this.style.display = "none";
+        };
+
+        document.getElementById('imgInput').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const img = new Image();
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            const preview = document.getElementById('preview');
+            const contenidoModal = document.getElementById('contenidoModal');
+            const usarPHBtn = document.getElementById('usarPH');
+
+            img.onload = function () {
+                const minLado = 50;
+                const proporcionMin = 2.2;
+                const largo = Math.max(img.width, img.height);
+                const corto = Math.min(img.width, img.height);
+
+                if (corto < minLado || largo / corto < proporcionMin) {
+                    contenidoModal.innerHTML = "<span style='color:red;'>⚠️ Solo se permiten fotos de tiras de pH (imagen rectangular y suficientemente grande).</span>";
+                    preview.style.display = "none";
+                    usarPHBtn.style.display = "none";
+                    phDetectado = null;
+                    return;
+                }
+
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+
+                const centroX = Math.floor(img.width / 2);
+                const centroY = Math.floor(img.height / 2);
+                const pixel = ctx.getImageData(centroX, centroY, 1, 1).data;
+
+                const r = pixel[0];
+                const g = pixel[1];
+                const b = pixel[2];
+
+                let html = `🎯 Color en el centro: <b>RGB(${r}, ${g}, ${b})</b><br>`;
+                const ph = identificarPH(r, g, b);
+                html += `🧪 Estimación de pH por color: <b>${ph}</b><br>`;
+                html += `<span class="text-muted">Si el valor estimado es correcto, haz clic en "Usar este pH".</span>`;
+
+                contenidoModal.innerHTML = html;
+                preview.style.display = "block";
+                usarPHBtn.style.display = "inline-block";
+                phDetectado = ph;
+            };
+
+            img.src = URL.createObjectURL(file);
+            preview.src = img.src;
+        });
+
+        document.getElementById('usarPH').onclick = function () {
+            if (phDetectado !== null && nombreRioSeleccionado) {
+                if (phIngresado !== null && phDetectado !== phIngresado) {
+                    document.getElementById('contenidoModal').innerHTML +=
+                        `<div class="alert alert-danger mt-3">⚠️ El valor de pH ingresado (${phIngresado}) es diferente al estimado por la imagen (${phDetectado}). Verifica tu medición.</div>`;
+                    return;
+                }
+                // Actualiza la base de datos en segundo plano y muestra mensaje
+                actualizarPHenBD(nombreRioSeleccionado, phIngresado, phDetectado);
+
+                document.getElementById('modal').style.display = "none";
+                mostrarResultadoPH(nombreRioSeleccionado, phDetectado, phIngresado);
+            }
+        };
+
+        function identificarPH(r, g, b) {
+            const coloresPH = [
+                { ph: 1, color: [255, 0, 0] },
+                { ph: 3, color: [255, 128, 0] },
+                { ph: 5, color: [255, 255, 0] },
+                { ph: 7, color: [0, 255, 0] },
+                { ph: 9, color: [0, 255, 255] },
+                { ph: 11, color: [0, 0, 255] },
+                { ph: 13, color: [128, 0, 128] }
+            ];
+
+            let mejorPH = null;
+            let menorDistancia = Infinity;
+
+            for (const entrada of coloresPH) {
+                const [cr, cg, cb] = entrada.color;
+                const distancia = Math.sqrt((r - cr) ** 2 + (g - cg) ** 2 + (b - cb) ** 2);
+                if (distancia < menorDistancia) {
+                    menorDistancia = distancia;
+                    mejorPH = entrada.ph;
+                }
+            }
+            return mejorPH;
+        }
+
+
+        /*function mostrarResultadoPH(nombreRio, ph, phManual) {
+            let nivel, etapas;
+
+            if (ph < 4) {
+                nivel = "MUY ACIDA";
+                etapas = [1, 2, 3, 4, 5, 6];
+            } else if (ph < 5.6) {
+                nivel = "ACIDA";
+                etapas = [1, 2, 3, 4, 5];
+            } else if (ph < 6.5) {
+                nivel = "LIGERAMENTE ACIDA";
+                etapas = [1, 2, 3, 4];
+            } else if (ph <= 8.5) {
+                nivel = "ACEPTABLE";
+                etapas = [1, 2];
+            } else {
+                nivel = "ALCALINA";
+                etapas = [1, 2, 4, 5];
+            }
+
+            const descripciones = {
+                1: "Etapa 1: Filtro de sedimentos – remueve polvo y tierra.",
+                2: "Etapa 2: Carbón activado granular – elimina cloro, sedimentos orgánicos y olores.",
+                3: "Etapa 3: Carbón block – elimina sabores, olores y más cloro.",
+                4: "Etapa 4: Membrana de ultrafiltración – remueve turbidez, bacterias y sustancias nocivas.",
+                5: "Etapa 5: Post filtro de carbón – mejora el sabor.",
+                6: "Etapa 6: Luz ultravioleta – esteriliza bacterias y virus."
+            };
+
+            const imagenes = {
+                1: "imagenes/sedimentos.jpg",
+                2: "imagenes/carbonGranulado.jpg",
+                3: "imagenes/carbonBlock.jpg",
+                4: "imagenes/membrana.jpg",
+                5: "imagenes/carbonGranuladoUltimo.jpg",
+                6: "imagenes/luzUltravioleta.jpg"
+            };
+
+            document.getElementById("titulo-rio").textContent = `Resultados para el ${nombreRio}`;
+            let texto = `pH por imagen: ${ph} (${nivel}).`;
+            if (phManual !== undefined && phManual !== null) {
+                texto = `pH ingresado: ${phManual} | pH por imagen: ${ph} (${nivel}).`;
+            }
+            document.getElementById("descripcion-ph").textContent = `${texto} Recomendamos las siguientes etapas:`;
+
+            const imagenesDiv = document.getElementById("imagenes-etapas");
+            imagenesDiv.innerHTML = "";
+            etapas.forEach(etapa => {
+                const div = document.createElement("div");
+                div.style.marginBottom = "10px";
+                div.innerHTML = `<strong>${descripciones[etapa]}</strong><br>
+                    <img src="${imagenes[etapa]}" alt="Etapa ${etapa}" style="width:100%; max-width:300px; border:1px solid #ccc; border-radius:10px;"><br>`;
+                imagenesDiv.appendChild(div);
+            });
+
+            document.getElementById("resultado-ph").style.display = "block";
+            // Scroll automático al div de resultados
+            document.getElementById("resultado-ph").scrollIntoView({ behavior: "smooth" });
+        }*/
+        
+        function actualizarPHenBD(nombreRio, phManual, phDetectado) {
+            fetch('archivo.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nombre: nombreRio,
+                    ph_manual: phManual,
+                    ph_detectado: phDetectado
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert("¡Información guardada correctamente!");
+                } else {
+                    alert("Ocurrió un error al guardar la información.");
+                }
+            })
+            .catch(err => {
+                alert("Error de conexión al guardar la información.");
+                console.error('Error al actualizar el pH en la base de datos:', err);
+            });
+        }
+            
+        let etapasKitActual = 0; // Variable global para saber cuántas etapas tiene el kit recomendado
+
+        function comprarKit() {
+            // Solo redirige a la tienda, la imagen ya se muestra automáticamente
+            alert("Redirigiendo a la tienda para comprar el kit...");
+            window.open("https://tutienda.com/kit-filtros", "_blank");
+        }
+
+        // Modifica mostrarResultadoPH para actualizar etapasKitActual y mostrar la imagen del kit recomendado automáticamente
+        function mostrarResultadoPH(nombreRio, ph, phManual) {
+            let nivel, etapas;
+
+            if (ph < 4) {
+                nivel = "MUY ACIDA";
+                etapas = [1, 2, 3, 4, 5, 6];
+            } else if (ph < 5.6) {
+                nivel = "ACIDA";
+                etapas = [1, 2, 3, 4, 5];
+            } else if (ph < 6.5) {
+                nivel = "LIGERAMENTE ACIDA";
+                etapas = [1, 2, 3, 4];
+            } else if (ph <= 8.5) {
+                nivel = "ACEPTABLE";
+                etapas = [1, 2];
+            } else {
+                nivel = "ALCALINA";
+                etapas = [1, 2, 3, 4, 5];
+            }
+
+            etapasKitActual = etapas.length; // Guarda la cantidad de etapas para usar en comprarKit
+
+            // Mostrar la imagen del kit automáticamente según etapasKitActual
+            let imagenKit = document.getElementById('imagen-kit');
+            let urlImagen = "imagenes/kit_default.jpg";
+            if (etapasKitActual >= 1 && etapasKitActual <= 6) {
+                urlImagen = `imagenes/kit_${etapasKitActual}.jpg`;
+            }
+            imagenKit.src = urlImagen;
+            imagenKit.style.border = "3px solid #28a745";
+            imagenKit.style.boxShadow = "0 0 16px #28a74555";
+
+            // ...resto de tu función...
+            const descripciones = {
+                1: "Etapa 1: Filtro de sedimentos – remueve polvo y tierra.",
+                2: "Etapa 2: Carbón activado granular – elimina cloro, sedimentos orgánicos y olores.",
+                3: "Etapa 3: Carbón block – elimina sabores, olores y más cloro.",
+                4: "Etapa 4: Membrana de ultrafiltración – remueve turbidez, bacterias y sustancias nocivas.",
+                5: "Etapa 5: Post filtro de carbón – mejora el sabor.",
+                6: "Etapa 6: Luz ultravioleta – esteriliza bacterias y virus."
+            };
+
+            const imagenes = {
+                1: "imagenes/sedimentos.jpg",
+                2: "imagenes/carbonGranulado.jpg",
+                3: "imagenes/carbonBlock.jpg",
+                4: "imagenes/membrana.jpg",
+                5: "imagenes/carbonGranuladoUltimo.jpg",
+                6: "imagenes/luzUltravioleta.jpg"
+            };
+
+            document.getElementById("titulo-rio").textContent = `Resultados para el ${nombreRio}`;
+            let texto = `pH por imagen: ${ph} (${nivel}).`;
+            if (phManual !== undefined && phManual !== null) {
+                texto = `pH ingresado: ${phManual} | pH por imagen: ${ph} (${nivel}).`;
+            }
+            document.getElementById("descripcion-ph").textContent = `${texto} Recomendamos las siguientes etapas:`;
+
+            const imagenesDiv = document.getElementById("imagenes-etapas");
+            imagenesDiv.innerHTML = "";
+            etapas.forEach(etapa => {
+                const div = document.createElement("div");
+                div.style.marginBottom = "10px";
+                div.innerHTML = `<strong>${descripciones[etapa]}</strong><br>
+                    <img src="${imagenes[etapa]}" alt="Etapa ${etapa}" style="width:100%; max-width:300px; border:1px solid #ccc; border-radius:10px;"><br>`;
+                imagenesDiv.appendChild(div);
+            });
+
+            document.getElementById("resultado-ph").style.display = "block";
+            document.getElementById("resultado-ph").scrollIntoView({ behavior: "smooth" });
+        }
+
+        function mostrarKitFiltros(imagenSrc, urlCompra) {
+            const imagenKit = document.getElementById('imagen-kit');
+            const botonCompra = document.getElementById('boton-compra');
+
+            imagenKit.src = imagenSrc || 'imagenes/kit_default.jpg'; // imagen por defecto si no se pasa nada
+            botonCompra.onclick = function() {
+                    window.open(urlCompra || 'https://tutienda.com/kit-filtros', '_blank');
+            };
+        }
+
+
+        function alternarVideoFiltrado() {
+            // Solo muestra y reproduce el video filtrado1.mp4
+            let video = document.getElementById('video-filtrado');
+            let source = document.getElementById('video-source');
+            source.src = "videos/filtrado1.mp4";
+            video.load();
+            video.play();
+        }
+
+        // Reproduce automáticamente el video filtrado1.mp4 al cargar la página
+        window.addEventListener('DOMContentLoaded', function() {
+            let video = document.getElementById('video-filtrado');
+            let source = document.getElementById('video-source');
+            source.src = "videos/filtrado1.mp4";
+            video.load();
+            video.play();
+        });
+
+    </script>
+
+</body>
+</html>

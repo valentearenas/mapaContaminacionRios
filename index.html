@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RITEC</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            min-height: 100vh;
+            max-height: 100vh;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; /* Evita scroll en toda la página */
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+        }
+        .menu-superior {
+            width: 100%;
+            background: #0E51FA;
+            color: #fff;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            flex-shrink: 0;
+        }
+        .logo-menu {
+            padding: 10px 30px;
+            display: flex;
+            align-items: center;
+        }
+        .logo-menu img {
+            width: 120px;
+            height: auto;
+            display: block;
+        }
+        .menu-superior nav ul {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0 30px 0 0;
+        }
+        .menu-superior nav ul li {
+            margin: 0 20px;
+        }
+        .menu-superior nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding: 20px 0;
+            display: block;
+            transition: background 0.2s, color 0.2s;
+        }
+        .menu-superior nav ul li a:hover {
+            color: #00FA0E;
+        }
+        .contenedor-informacion {
+            max-width: 900px;
+            width: 100%;
+            margin: 20px auto; /* Margen igual en todos los lados */
+            background: #fff;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            flex: 1 1 auto;
+            max-height: calc(100vh - 40px - 70px); /* Ajusta alto restando margen y menú */
+            overflow: auto;
+        }
+        .logo {
+            margin-bottom: 20px;
+        }
+        .logo img {
+            width: 180px; /* Aumenta el tamaño del logo en el contenido */
+            height: auto;
+        }
+        .txt-sobre-pagina {
+            font-size: 0.95rem; /* Letra más pequeña */
+            color: #333;
+            max-width: 600px;
+            text-align: center;
+            background: #f9f9f9;
+            padding: 15px 10px; /* Reduce padding */
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-superior">
+        <div class="logo-menu">
+            <img src="logo.png" alt="LOGO" />
+        </div>
+        <nav>
+            <ul>
+                <li>
+                    <a href="mapaContaminacion.html">MAPA</a>
+                </li>
+                <li>
+                    <a href="comoUsar.html">CÓMO USAR</a>
+                </li>
+                <li>
+                    <a href="tabla.php">TABLA RIOS</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <div class="contenedor-informacion">
+        <div class="logo">
+            <img src="logo.png" alt="LOGO">
+        </div>
+        <div class="txt-sobre-pagina">
+    <!-- <h2 style="color:#0096FA; margin-top:0; font-size:1.1rem;">Nuestra Misión</h2> -->
+    <p style="margin: 8px 0 14px 0; font-size:0.92rem;">
+        <strong style="color:#0E51FA;">Bug Busters</strong> cree que el futuro del planeta empieza con cada gota.<br>
+        Nuestra misión es <b>fomentar la cultura hídrica</b>, empoderando a la comunidad con herramientas digitales para cuidar ríos, lagos y cuerpos de agua en su entorno.
+    </p>
+    <div style="font-size:0.92rem; margin-bottom:10px;">
+        <span style="font-size:1.1em;">🌍</span>
+        <b>Mapa interactivo:</b> Explora los ríos y lagos de tu zona, ingresa los niveles de <b>pH</b> del agua que detectes y contribuye a una base de datos colaborativa para el monitoreo del agua.
+    </div>
+    <div style="font-size:0.92rem; margin-bottom:10px;">
+        <span style="font-size:1.1em;">💧</span>
+        <b>¿El río está contaminado?</b> ¡No te preocupes! Te mostramos cómo construir <b>filtros caseros</b> adaptados al tipo de contaminación detectada y te damos acceso a opciones de compra confiables para filtros profesionales.
+    </div>
+    <div style="font-size:0.92rem;">
+        <span style="font-size:1.1em;">🔬</span>
+        <b>Juntos, comunidad y tecnología</b>, podemos prevenir la contaminación, recuperar nuestras fuentes de agua y formar una red de usuarios conscientes y comprometidos.
+    </div>
+</div>
+    </div>
+</body>
+</html>
