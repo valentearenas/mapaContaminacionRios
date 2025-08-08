@@ -162,20 +162,53 @@
                 .openPopup();
         }
 
-        function mapaRios(latitud, longitud) {
-            fetch('rios_veracruz1.json')
+        function mapaRios() {
+            fetch('Calidad_del_Agua_Superficial_p.json')
                 .then(res => res.json())
                 .then(data => {
-                    // Filtrar ríos
+                    // Lista de tipos permitidos
+                    const tiposPermitidos = [
+                        "LÓTICO",
+                        "LÉNTICO",
+                        "LÉNTICO (HUMEDAL)",
+                        "LÓTICO (HUMEDAL)",
+                        "LÓTICO - COSTERO",
+                        "LENTICAS",
+                        "LENTICO",
+                        "LÉNTICO - COSTERO (HUMEDAL)",
+                        "LÉNTICO - COSTERO",
+                        "LÉNTICO (ESTUDIO ESPECIAL)",
+                        "LENTICO (HUMEDAL)",
+                        "LOTICO",
+                        "LÓTICO - COSTERO (HUMEDAL)",
+                        "LÓTICO (ESTUDIO ESPECIAL)",
+                        "LÓTICO A - TIPO 1",
+                        "LÓTICO A - TIPO 2",
+                        "LÓTICO A - TIPO 3",
+                        "LÓTICO A - TIPO 4",
+                        "LÓTICO A - TIPO 5",
+                        "LÓTICO A - TIPO 6",
+                        "LÓTICO A - TIPO 7",
+                        "LÓTICO A - TIPO 7(HUMEDAL)",
+                        "LÓTICO A - TIPO 8",
+                        "LÓTICO A - TIPO 9",
+                        "LÓTICO A - TIPO 10",
+                        "LÓTICO Y SEDIMENTOS"
+                    ];
+
+                    // Filtrar ríos (tipos relacionados con LÓTICO o LOTICO)
                     const rios = data.features.filter(feature =>
-                        feature.properties.GEOGRAFICO === "Corriente de Agua" &&
-                        feature.properties.AMBITO === "R"
+                        tiposPermitidos.includes(feature.properties.TIPO) &&
+                        feature.properties.TIPO.toUpperCase().includes("LÓTICO") ||
+                        feature.properties.TIPO.toUpperCase().includes("LOTICO")
                     );
 
-                    // Filtrar lagunas
+                    // Filtrar lagunas (tipos relacionados con LÉNTICO, LENTICO o LENTICAS)
                     const lagunas = data.features.filter(feature =>
-                        feature.properties.GEOGRAFICO === "Laguna" &&
-                        feature.properties.AMBITO === "L"
+                        tiposPermitidos.includes(feature.properties.TIPO) &&
+                        (feature.properties.TIPO.toUpperCase().includes("LÉNTICO") ||
+                        feature.properties.TIPO.toUpperCase().includes("LENTICO") ||
+                        feature.properties.TIPO.toUpperCase().includes("LENTICAS"))
                     );
 
                     // Fusionar ríos y lagunas
@@ -184,22 +217,58 @@
                         features: [...rios, ...lagunas]
                     };
 
+                    // Depuración: Mostrar cuántos sitios se filtraron
+                    console.log(`Ríos filtrados: ${rios.length}, Lagunas filtradas: ${lagunas.length}, Total: ${cuerposAgua.features.length}`);
+
                     const capasAgua = L.geoJSON(cuerposAgua, {
                         style: function (feature) {
-                            // Todos los ríos y lagunas se pintan de azul
+                            // Estilo basado en SEMAFORO
+                            let color;
+                            switch (feature.properties.SEMAFORO) {
+                                case "Verde":
+                                    color = '#28a745'; // Verde Bootstrap
+                                    break;
+                                case "Amarillo":
+                                    color = '#ffc107'; // Amarillo Bootstrap
+                                    break;
+                                case "Rojo":
+                                    color = '#dc3545'; // Rojo Bootstrap
+                                    break;
+                                default:
+                                    color = '#007bff'; // Azul por defecto
+                            }
                             return {
-                                color: '#007bff', // Azul Bootstrap
+                                color: color,
                                 weight: 5,
                                 opacity: 0.8
                             };
                         },
+                        pointToLayer: function (feature, latlng) {
+                            // Representar puntos como marcadores circulares
+                            return L.circleMarker(latlng, {
+                                radius: 8,
+                                fillColor: feature.properties.SEMAFORO === "Verde" ? '#28a745' :
+                                        feature.properties.SEMAFORO === "Amarillo" ? '#ffc107' :
+                                        feature.properties.SEMAFORO === "Rojo" ? '#dc3545' : '#007bff',
+                                fillOpacity: 0.8
+                            });
+                        },
                         onEachFeature: function (feature, layer) {
-                            let nombre = feature.properties.NOMBRE || "Sin nombre";
-                            let prefijo = feature.properties.GEOGRAFICO === "Lagunas" ? "" : "";
+                            let nombre = feature.properties.SITIO || "Sin nombre";
+                            let prefijo = feature.properties.TIPO.toUpperCase().includes("LÉNTICO") ||
+                                        feature.properties.TIPO.toUpperCase().includes("LENTICO") ||
+                                        feature.properties.TIPO.toUpperCase().includes("LENTICAS") ? 
+                                        "Laguna/Presa: " : "Río/Arroyo: ";
+                            let calidad = feature.properties.SEMAFORO || "No disponible";
+                            let contaminantes = feature.properties.CONTAMINANTES || "Ninguno";
                             const nombreCompleto = prefijo + nombre;
 
-                            layer.bindPopup(`<b>${nombreCompleto}</b>
-                                <button class="btn btn-sm btn-primary mt-2" onclick="valorPH('${nombre}', 7)">Ingresar valor de pH</button>`);
+                            layer.bindPopup(`
+                                <b>${nombreCompleto}</b><br>
+                                Calidad del agua: <span style="color: ${calidad === 'Verde' ? '#28a745' : calidad === 'Amarillo' ? '#ffc107' : calidad === 'Rojo' ? '#dc3545' : '#000'}">${calidad}</span><br>
+                                Contaminantes: ${contaminantes}<br>
+                                <button class="btn btn-sm btn-primary mt-2" onclick="valorPH('${nombre}', 7)">Ingresar valor de pH</button>
+                            `);
                         }
                     }).addTo(map);
                 })
