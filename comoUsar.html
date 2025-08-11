@@ -1,153 +1,243 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cómo Usar - Bug Busters</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Cómo Usar AquaGuard</title>
     <style>
-        body { background-color: #f0f8ff; }
-        .navbar { background-color: #007bff; }
-        .card { margin: 20px 0; border: none; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        .educativo { margin-top: 40px; padding: 20px; background: #e9f7fd; border-radius: 8px; }
-        .educativo h5 { color: #007bff; }
-        .video-iframe { max-width: 100%; height: auto; }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            min-height: 100vh;
+            max-height: 100vh;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e6f7ff 0%, #f0f9ff 100%);
+            display: flex;
+            flex-direction: column;
+        }
+        .menu-superior {
+            width: 100%;
+            background: #0077b6;
+            color: #fff;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+        .logo-menu {
+            padding: 10px 30px;
+            display: flex;
+            align-items: center;
+        }
+        .logo-menu img {
+            width: 70px;
+            height: auto;
+            display: block;
+        }
+        .menu-superior nav ul {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0 30px 0 0;
+        }
+        .menu-superior nav ul li {
+            margin: 0 20px;
+        }
+        .menu-superior nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 20px 0;
+            display: block;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .menu-superior nav ul li a:hover {
+            color: #90e0ef;
+            border-bottom: 2px solid #90e0ef;
+        }
+        .contenedor-informacion {
+            max-width: 900px;
+            width: 100%;
+            margin: 20px auto;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            flex: 1 1 auto;
+            max-height: calc(100vh - 40px - 70px);
+            overflow: auto;
+        }
+        .logo {
+            margin-bottom: 25px;
+        }
+        .logo img {
+            width: 90px;
+            height: auto;
+            transition: transform 0.3s ease;
+        }
+        .logo img:hover {
+            transform: scale(1.05);
+        }
+        .txt-sobre-pagina {
+            font-size: 1rem;
+            color: #333;
+            max-width: 700px;
+            text-align: center;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        .pasos-lista {
+            text-align: left;
+            margin: 0 auto;
+            padding: 0;
+            max-width: 600px;
+        }
+        .pasos-lista li {
+            margin-bottom: 20px;
+            font-size: 1rem;
+            line-height: 1.6;
+            list-style: none;
+            position: relative;
+            padding-left: 40px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .pasos-lista li::before {
+            content: attr(data-icon);
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 1.5em;
+            color: #0077b6;
+        }
+        .pasos-titulo {
+            color: #0077b6;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .pasos-desc {
+            color: #555;
+        }
+        .video-container {
+            margin-top: 30px;
+            width: 100%;
+            max-width: 600px;
+        }
+        .video-container iframe {
+            width: 100%;
+            height: 340px;
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .water-wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" fill="%230077b6" opacity=".25"/><path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" fill="%230077b6" opacity=".5"/><path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" fill="%230077b6"/></svg>');
+            background-size: cover;
+            z-index: -1;
+        }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="index.html">Bug Busters</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="mapaContaminacion.html">MAPA</a></li>
-                    <li class="nav-item active"><a class="nav-link" href="comoUsar.html">CÓMO USAR</a></li>
-                    <li class="nav-item"><a class="nav-link" href="tablaRios.html">TABLA RIOS</a></li>
-                    <li class="nav-item"><a class="nav-link" href="juego.html">JUEGA Y APRENDE</a></li>
-                </ul>
-            </div>
+    <div class="menu-superior">
+        <div class="logo-menu">
+            <img src="logo.png" alt="AquaGuard Logo" />
         </div>
-    </nav>
-
-    <div class="container">
-        <h2 class="mt-4">¿Cómo Usar la Plataforma?</h2>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5>1. Explora el mapa interactivo</h5>
-                        <p>Navega por el mapa para localizar ríos, lagos y cuerpos de agua cercanos a tu zona.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5>2. Selecciona un cuerpo de agua</h5>
-                        <p>Haz clic en un marcador para ver nombre, calidad y contaminantes. Usa el botón para detalles y filtración.</p>
-                    </div>
-                </div>
-            </div>
-            <!-- Otros pasos similares -->
+        <nav>
+            <ul>
+                <li>
+                    <a href="mapaContaminacion.html">MAPA</a>
+                </li>
+                <li>
+                    <a href="comoUsar.html">CÓMO USAR</a>
+                </li>
+                <li>
+                    <a href="tabla.php">TABLA RIOS</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <div class="contenedor-informacion">
+        <div class="logo">
+            <img src="logo.png" alt="AquaGuard Logo">
         </div>
-
-        <div class="educativo">
-            <h4>Apartado Educativo: Aprende sobre el Agua</h4>
-            <h5>Cómo interpretar cada prueba del agua</h5>
-            <p>Las pruebas incluyen pH, DBO (demanda bioquímica de oxígeno), DQO (demanda química de oxígeno), SST (sólidos suspendidos totales), CF (coliformes fecales), y E_COLI. Un pH entre 6.5-8.5 es ideal; alto DBO/DQO indica contaminación orgánica; alto SST causa turbidez; CF/E_COLI indican contaminación fecal.<grok:render card_id="039664" card_type="citation_card" type="render_inline_citation">
-<argument name="citation_id">20</argument>
-</grok:render> <grok:render card_id="55fb0c" card_type="citation_card" type="render_inline_citation">
-<argument name="citation_id">21</argument>
-</grok:render></p>
-
-            <h5>Cómo funciona cada etapa de filtración</h5>
-            <p>1. Coagulación/Floculación: Agrega químicos para agrupar partículas. 2. Sedimentación: Partículas se asientan. 3. Filtración: Pasa por arena/carbón para remover impurezas. 4. Desinfección: Usa cloro/UV para matar bacterias. 5. pH Ajuste: Neutraliza.<grok:render card_id="171988" card_type="citation_card" type="render_inline_citation">
-<argument name="citation_id">1</argument>
-</grok:render> <grok:render card_id="dbb531" card_type="citation_card" type="render_inline_citation">
-<argument name="citation_id">2</argument>
-</grok:render></p>
-
-            <h5>Riesgos del consumo de agua no tratada</h5>
-            <p>Puede causar diarrea, cólera, disentería, tifoidea, y problemas crónicos como daño hepático o cáncer por metales pesados.<grok:render card_id="09cd5d" card_type="citation_card" type="render_inline_citation">
-<argument name="citation_id">10</argument>
-</grok:render> <grok:render card_id="1c0886" card_type="citation_card" type="render_inline_citation">
-<argument name="citation_id">11</argument>
-</grok:render></p>
-
-            <h5>Qué tipo de contaminantes existen</h5>
-            <p>Biológicos (bacterias, virus); químicos (metales pesados, pesticidas); físicos (sedimentos).<grok:render card_id="fdecfa" card_type="citation_card" type="render_inline_citation">
-<argument name="citation_id">15</argument>
-</grok:render> <grok:render card_id="25cdb6" card_type="citation_card" type="render_inline_citation">
-<argument name="citation_id">16</argument>
-</grok:render></p>
-
-            <h5>Qué tecnologías de filtración podrían usarse</h5>
-            <p>Ósmosis inversa para metales; carbón activado para orgánicos; UV para bacterias; microfiltración para sedimentos.<grok:render card_id="d4de6b" card_type="citation_card" type="render_inline_citation">
-<argument name="citation_id">5</argument>
-</grok:render> <grok:render card_id="719691" card_type="citation_card" type="render_inline_citation">
-<argument name="citation_id">6</argument>
-</grok:render></p>
-
-            <h5>Por qué es importante preservar nuestras fuentes hídricas</h5>
-            <p>Evita escasez, protege ecosistemas, previene enfermedades, y asegura agua para generaciones futuras.<grok:render card_id="eaf6b7" card_type="citation_card" type="render_inline_citation">
-<argument name="citation_id">25</argument>
-</grok:render> <grok:render card_id="4e98c8" card_type="citation_card" type="render_inline_citation">
-<argument name="citation_id">26</argument>
-</grok:render></p>
-
-            <h5>Recursos: Tutoriales, Infografías y Videos</h5>
-            <p>Video: Guía de filtración de agua de pozo <iframe class="video-iframe" src="https://www.youtube.com/embed/_rbABAeJM9U" title="Ultimate Guide to WELL WATER FILTRATION 2024!" frameborder="0" allowfullscreen></iframe><grok:render card_id="c485bb" card_type="citation_card" type="render_inline_citation">
-<argument name="citation_id">35</argument>
-</grok:render></p>
-            <p>Infografía: Tipos de contaminantes (busca en EPA.gov para descargar).</p>
-            <p>Tutorial: Construye un filtro casero (YouTube: "Complete Guide to WELL WATER FILTRATION") <grok:render card_id="257aef" card_type="citation_card" type="render_inline_citation">
-<argument name="citation_id">36</argument>
-</grok:render>.</p>
+        <div class="txt-sobre-pagina">
+            <h2 style="color:#0077b6; margin-top:0; font-size:1.5rem;">Guía para usar AquaGuard</h2>
+            <p style="margin: 15px 0 25px 0; font-size:1.05rem; line-height:1.6;">
+                AquaGuard es una plataforma diseñada para monitorear la calidad del agua y proporcionar soluciones. Sigue estos pasos para aprovechar al máximo sus funciones.
+            </p>
+            
+            <ul class="pasos-lista">
+                <li data-icon="🗺️">
+                    <span class="pasos-titulo">1. Explorar el mapa interactivo</span>
+                    <span class="pasos-desc">
+                        Navega por el mapa para encontrar ríos, lagos y otros cuerpos de agua cercanos a tu ubicación. 
+                        Los marcadores de colores indican la calidad del agua: <span style="color:#28a745">Verde (Buena)</span>, 
+                        <span style="color:#ffc107">Amarillo (Moderada)</span>, <span style="color:#dc3545">Rojo (Mala)</span>.
+                    </span>
+                </li>
+                <li data-icon="🔍">
+                    <span class="pasos-titulo">2. Seleccionar un cuerpo de agua</span>
+                    <span class="pasos-desc">
+                        Haz clic en cualquier marcador para ver información básica sobre ese cuerpo de agua, 
+                        incluyendo su nombre, ubicación y calidad. Usa el botón "Ver detalles completos" 
+                        para acceder a información más detallada.
+                    </span>
+                </li>
+                <li data-icon="📊">
+                    <span class="pasos-titulo">3. Analizar los datos de calidad</span>
+                    <span class="pasos-desc">
+                        En el panel de detalles, encontrarás información sobre parámetros como DBO, DQO, 
+                        coliformes fecales, oxígeno disuelto y más. Cada parámetro incluye su valor medido 
+                        y una evaluación de su calidad.
+                    </span>
+                </li>
+                <li data-icon="💧">
+                    <span class="pasos-titulo">4. Obtener recomendaciones de tratamiento</span>
+                    <span class="pasos-desc">
+                        Basado en los contaminantes detectados, AquaGuard proporciona recomendaciones 
+                        personalizadas de tratamiento, desde filtros caseros hasta sistemas profesionales, 
+                        con instrucciones detalladas para cada etapa.
+                    </span>
+                </li>
+                <li data-icon="📱">
+                    <span class="pasos-titulo">5. Contribuir con datos</span>
+                    <span class="pasos-desc">
+                        Si tienes mediciones recientes de calidad de agua, puedes contribuir a la base 
+                        de datos comunitaria para ayudar a mantener la información actualizada.
+                    </span>
+                </li>
+            </ul>
+            
+            <div class="video-container">
+                <h3 style="color:#0077b6; margin-top:30px; font-size:1.2rem;">Video Tutorial</h3>
+                <iframe src="https://www.youtube.com/embed/ejemplo" title="Tutorial AquaGuard" allowfullscreen></iframe>
+            </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="water-wave"></div>
 </body>
 </html>

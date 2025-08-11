@@ -1,197 +1,550 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapa de Calidad del Agua - Bug Busters</title>
+    <title>AquaGuard - Mapa de Calidad del Agua</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #f0f8ff; }
-        #map { height: 500px; border: 1px solid #007bff; border-radius: 8px; }
-        .navbar { background-color: #007bff; }
-        .search-bar { margin: 20px 0; }
-        .legend { position: absolute; bottom: 20px; left: 10px; background: white; padding: 10px; border-radius: 5px; box-shadow: 0 0 5px rgba(0,0,0,0.2); z-index: 1000; }
-        .legend-color { display: inline-block; width: 20px; height: 20px; vertical-align: middle; margin-right: 5px; }
-        #control-panel { margin: 20px 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f9ff;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background: #0077b6;
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .logo-container img {
+            height: 70px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .logo-container img:hover {
+            transform: scale(1.05);
+        }
+        .subtitle {
+            color: #caf0f8;
+            font-size: 1rem;
+        }
+        .map-container {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            padding: 10px 15px;
+            border: 2px solid #90e0ef;
+            border-radius: 30px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .search-box:focus {
+            border-color: #0077b6;
+            box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.3);
+        }
+        .btn-primary-custom {
+            background: #00b4d8;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary-custom:hover {
+            background: #0096c7;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        #mapa {
+            height: 600px;
+            width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border: 1px solid #caf0f8;
+        }
+        .legend {
+            padding: 10px 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+        .legend i {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        .info-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            display: none;
+        }
+        .info-title {
+            color: #0077b6;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        .parameter-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .parameter-name {
+            font-weight: 600;
+            color: #333;
+        }
+        .parameter-value {
+            color: #0077b6;
+        }
+        .quality-good {
+            color: #28a745;
+        }
+        .quality-moderate {
+            color: #ffc107;
+        }
+        .quality-bad {
+            color: #dc3545;
+        }
+        .treatment-steps {
+            margin-top: 20px;
+        }
+        .step-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #00b4d8;
+        }
+        .step-title {
+            font-weight: 600;
+            color: #0077b6;
+            margin-bottom: 8px;
+        }
+        .step-desc {
+            color: #555;
+            font-size: 0.95rem;
+        }
+        .close-panel {
+            float: right;
+            cursor: pointer;
+            color: #888;
+            font-size: 1.2rem;
+        }
+        .close-panel:hover {
+            color: #555;
+        }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="index.html">Bug Busters</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="index.html">INICIO</a></li>
-                    <li class="nav-item active"><a class="nav-link" href="mapaContaminacion.html">MAPA</a></li>
-                    <li class="nav-item"><a class="nav-link" href="comoUsar.html">CÓMO USAR</a></li>
-                    <li class="nav-item"><a class="nav-link" href="tablaRios.html">TABLA RIOS</a></li>
-                    <li class="nav-item"><a class="nav-link" href="juego.html">JUEGA Y APRENDE</a></li>
-                </ul>
-            </div>
+    <div class="header text-center">
+        <div class="logo-container">
+            <a href="index.html">
+                <img src="logo.png" alt="AquaGuard Logo">
+            </a>
         </div>
-    </nav>
-
-    <div class="container">
-        <h2 class="mt-4">Mapa de Calidad del Agua</h2>
-        <div class="search-bar">
-            <input type="text" id="buscadorSitio" class="form-control" placeholder="Buscar por nombre de sitio (SITIO)">
-        </div>
-        <div id="map"></div>
-        <div class="mt-3">
-            <p><strong>Tu ubicación:</strong> <span id="ubicacion">No detectada</span></p>
-            <button class="btn btn-primary" onclick="obtenerUbicacion()">Obtener tu ubicación</button>
-        </div>
-
-        <div id="control-panel">
-            <h5>Filtros</h5>
-            <select id="filtroSemaforo" class="form-select mb-2">
-                <option value="Todos">Todos</option>
-                <option value="Verde">Verde</option>
-                <option value="Amarillo">Amarillo</option>
-                <option value="Rojo">Rojo</option>
-            </select>
-            <select id="filtroEstado" class="form-select mb-2">
-                <option value="Todos">Todos</option>
-            </select>
-            <div class="mt-3">
-                <p id="totalSitios">Total de sitios: 0</p>
-                <p id="sitiosContaminados">Sitios contaminados: 0</p>
-            </div>
-        </div>
-
-        <div class="legend">
-            <h6>Leyenda</h6>
-            <div><span class="legend-color" style="background: #28a745;"></span> Verde: Buena calidad</div>
-            <div><span class="legend-color" style="background: #ffc107;"></span> Amarillo: Moderada</div>
-            <div><span class="legend-color" style="background: #dc3545;"></span> Rojo: Contaminada</div>
-        </div>
+        <p class="subtitle">Los cuerpos de agua se muestran según su calidad: Verde (Buena) | Amarillo (Moderada) | Rojo (Mala)</p>
     </div>
 
-    <!-- Modal para detalles y filtración -->
-    <div class="modal fade" id="modalDetalles" tabindex="-1" aria-labelledby="modalDetallesLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalDetallesLabel">Detalles y Filtración</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="map-container">
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-box" placeholder="Buscar por ubicación o nombre de río...">
+            <button id="searchButton" class="btn-primary-custom"><i class="fas fa-search"></i> Buscar</button>
+            <button onclick="obtenerUbi()" class="btn-primary-custom"><i class="fas fa-location-arrow"></i> Mi Ubicación</button>
+        </div>
+
+        <div id="mapa"></div>
+
+        <div class="info-panel" id="infoPanel">
+            <span class="close-panel" onclick="cerrarPanel()">&times;</span>
+            <h3 class="info-title" id="waterBodyTitle"></h3>
+            <div id="waterBodyInfo"></div>
+            
+            <div class="treatment-steps" id="treatmentSteps">
+                <h4><i class="fas fa-filter"></i> Recomendaciones de Tratamiento</h4>
+                <div id="stepsContainer"></div>
+            </div>
+            
+            <div class="mt-4">
+                <h4><i class="fas fa-info-circle"></i> Información Adicional</h4>
+                <div class="parameter-row">
+                    <span class="parameter-name">Estado:</span>
+                    <span class="parameter-value" id="aptaStatus"></span>
                 </div>
-                <div class="modal-body">
-                    <div id="detallesContent"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                </div>
+                <div id="additionalInfo"></div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Código para el mapa (mapaRios() modificada)
-        const map = L.map('map').setView([23.6345, -102.5528], 5);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
+        let map;
+        let ubicacionMarker;
+        let capasAgua;
+        let currentLocation = [19.4326, -99.1332]; // Default to CDMX
 
-        let geojsonLayer;
-        let allFeatures;
+        // Initialize the map
+        function initMap() {
+            map = L.map('mapa').setView(currentLocation, 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Add legend
+            const legend = L.control({position: 'bottomright'});
+            legend.onAdd = function() {
+                const div = L.DomUtil.create('div', 'legend');
+                div.innerHTML = `
+                    <h4>Calidad del Agua</h4>
+                    <div><i style="background:#28a745"></i> Buena</div>
+                    <div><i style="background:#ffc107"></i> Moderada</div>
+                    <div><i style="background:#dc3545"></i> Mala</div>
+                `;
+                return div;
+            };
+            legend.addTo(map);
+            
+            cargarCuerposAgua();
+        }
 
-        function mapaRios() {
+        // Load water bodies from GeoJSON
+        function cargarCuerposAgua() {
             fetch('Calidad_del_Agua_Superficial_p.json')
                 .then(res => res.json())
                 .then(data => {
-                    // (La función completa de mapaRios() como en respuestas anteriores, ajustada para nuevo popup)
-                    // ... (omitido por brevidad, pero incluye filtros, leyenda, etc.)
+                    const tiposPermitidos = [
+                        "LÓTICO", "LÉNTICO", "LÉNTICO (HUMEDAL)", "LÓTICO (HUMEDAL)", 
+                        "LÓTICO - COSTERO", "LENTICAS", "LENTICO", "LÉNTICO - COSTERO (HUMEDAL)",
+                        "LÉNTICO - COSTERO", "LÉNTICO (ESTUDIO ESPECIAL)", "LENTICO (HUMEDAL)",
+                        "LOTICO", "LÓTICO - COSTERO (HUMEDAL)", "LÓTICO (ESTUDIO ESPECIAL)",
+                        "LÓTICO A - TIPO 1", "LÓTICO A - TIPO 2", "LÓTICO A - TIPO 3",
+                        "LÓTICO A - TIPO 4", "LÓTICO A - TIPO 5", "LÓTICO A - TIPO 6",
+                        "LÓTICO A - TIPO 7", "LÓTICO A - TIPO 7(HUMEDAL)", "LÓTICO A - TIPO 8",
+                        "LÓTICO A - TIPO 9", "LÓTICO A - TIPO 10", "LÓTICO Y SEDIMENTOS"
+                    ];
 
-                    // En onEachFeature:
-                    layer.bindPopup(`
-                        <b>${nombreCompleto}</b><br>
-                        Calidad: <span style="color: ${color}">${calidad}</span><br>
-                        Contaminantes: ${contaminantes}<br>
-                        <button class="btn btn-sm btn-info mt-2" onclick="mostrarDetallesAvanzados('${feature.properties}')">Ver detalles y filtración</button>
-                    `);
+                    const cuerposAgua = {
+                        type: "FeatureCollection",
+                        features: data.features.filter(feature => 
+                            tiposPermitidos.includes(feature.properties.TIPO)
+                        )
+                    };
+
+                    capasAgua = L.geoJSON(cuerposAgua, {
+                        style: function(feature) {
+                            let color;
+                            switch (feature.properties.SEMAFORO) {
+                                case "Verde": color = '#28a745'; break;
+                                case "Amarillo": color = '#ffc107'; break;
+                                case "Rojo": color = '#dc3545'; break;
+                                default: color = '#007bff';
+                            }
+                            return {
+                                color: color,
+                                weight: 5,
+                                opacity: 0.8,
+                                fillOpacity: 0.5
+                            };
+                        },
+                        pointToLayer: function(feature, latlng) {
+                            return L.circleMarker(latlng, {
+                                radius: 8,
+                                fillColor: feature.properties.SEMAFORO === "Verde" ? '#28a745' :
+                                          feature.properties.SEMAFORO === "Amarillo" ? '#ffc107' :
+                                          feature.properties.SEMAFORO === "Rojo" ? '#dc3545' : '#007bff',
+                                fillOpacity: 0.8
+                            });
+                        },
+                        onEachFeature: function(feature, layer) {
+                            const props = feature.properties;
+                            let nombre = props.SITIO || "Sin nombre";
+                            let tipo = props.TIPO.toUpperCase().includes("LÉNTICO") || 
+                                       props.TIPO.toUpperCase().includes("LENTICO") || 
+                                       props.TIPO.toUpperCase().includes("LENTICAS") ? 
+                                       "Laguna/Presa" : "Río/Arroyo";
+                            
+                            layer.bindPopup(`
+                                <b>${tipo}: ${nombre}</b><br>
+                                <small>${props.MUNICIPIO}, ${props.ESTADO}</small><hr>
+                                <b>Calidad:</b> <span style="color:${props.SEMAFORO === 'Verde' ? '#28a745' : 
+                                                               props.SEMAFORO === 'Amarillo' ? '#ffc107' : 
+                                                               props.SEMAFORO === 'Rojo' ? '#dc3545' : '#000'}">
+                                ${props.SEMAFORO || "No disponible"}</span><br>
+                                <b>Contaminantes:</b> ${props.CONTAMINANTES || "No detectados"}<br><br>
+                                <button class="btn btn-sm btn-primary" onclick="mostrarDetalles('${nombre}', '${tipo}', ${JSON.stringify(props).replace(/'/g, "\\'")})">
+                                    Ver detalles completos
+                                </button>
+                            `);
+                        }
+                    }).addTo(map);
+                })
+                .catch(error => {
+                    console.error("Error al cargar los datos:", error);
+                    alert("Error al cargar los datos de los cuerpos de agua. Por favor intente más tarde.");
                 });
         }
 
-        function mostrarDetallesAvanzados(feature) {
-            const calidad = feature.SEMAFORO;
-            const contaminantes = feature.CONTAMINANTES;
-            const estadoApta = calidad === 'Verde' ? 'Apta' : calidad === 'Amarillo' ? 'Condicional' : 'No apta';
-            let recomendaciones = '';
-            if (contaminantes.includes('CF') || contaminantes.includes('E_COLI')) {
-                recomendaciones += 'Desinfección con UV o cloro; filtración microscópica.<grok:render card_id="0296c5" card_type="citation_card" type="render_inline_citation"><argument name="citation_id">30</argument></grok:render>';
-            }
-            if (contaminantes.includes('DBO') || contaminantes.includes('DQO')) {
-                recomendaciones += 'Carbón activado y ósmosis inversa para orgánicos.<grok:render card_id="8d37f3" card_type="citation_card" type="render_inline_citation"><argument name="citation_id">32</argument></grok:render>';
-            }
-            if (contaminantes.includes('SST')) {
-                recomendaciones += 'Sedimentación y filtración de arena.<grok:render card_id="d22519" card_type="citation_card" type="render_inline_citation"><argument name="citation_id">0</argument></grok:render>';
-            }
-
-            document.getElementById('detallesContent').innerHTML = `
-                <p><strong>Nombre:</strong> ${feature.SITIO}</p>
-                <p><strong>Calidad:</strong> ${calidad}</p>
-                <p><strong>Contaminantes:</strong> ${contaminantes}</p>
-                <p><strong>Resultados detallados:</strong> DBO: ${feature['DBO_mg/L']}, DQO: ${feature['DQO_mg/L']}, SST: ${feature['SST_mg/L']}, CF: ${feature['COLI_FEC_NMP_100mL']}, E_COLI: ${feature['E_COLI_NMP_100mL']}</p>
-                <p><strong>Estado:</strong> ${estadoApta}</p>
-                <p><strong>Recomendaciones de filtración:</strong> ${recomendaciones}</p>
-                <p>Etapas de filtración sugeridas: 1. Sedimentación 2. Carbón activado 3. Desinfección 4. Ajuste pH.<grok:render card_id="00b532" card_type="citation_card" type="render_inline_citation">
-<argument name="citation_id">3</argument>
-</grok:render></p>
+        // Show detailed information about a water body
+        function mostrarDetalles(nombre, tipo, propiedades) {
+            document.getElementById('waterBodyTitle').textContent = `${tipo}: ${nombre}`;
+            
+            let infoHTML = `
+                <div class="parameter-row">
+                    <span class="parameter-name">Ubicación:</span>
+                    <span class="parameter-value">${propiedades.MUNICIPIO}, ${propiedades.ESTADO}</span>
+                </div>
+                <div class="parameter-row">
+                    <span class="parameter-name">Calidad del agua:</span>
+                    <span class="parameter-value ${propiedades.SEMAFORO === 'Verde' ? 'quality-good' : 
+                                               propiedades.SEMAFORO === 'Amarillo' ? 'quality-moderate' : 
+                                               'quality-bad'}">
+                        ${propiedades.SEMAFORO}
+                    </span>
+                </div>
+                <div class="parameter-row">
+                    <span class="parameter-name">Contaminantes principales:</span>
+                    <span class="parameter-value">${propiedades.CONTAMINANTES || 'No detectados'}</span>
+                </div>
+                <hr>
             `;
-            new bootstrap.Modal(document.getElementById('modalDetalles')).show();
+            
+            // Add water quality parameters
+            const parametros = [
+                { name: 'DBO (mg/L)', value: propiedades['DBO_mg/L'], quality: propiedades['CALIDAD_DBO'] },
+                { name: 'DQO (mg/L)', value: propiedades['DQO_mg/L'], quality: propiedades['CALIDAD_DQO'] },
+                { name: 'SST (mg/L)', value: propiedades['SST_mg/L'], quality: propiedades['CALIDAD_SST'] },
+                { name: 'Coliformes Fecales (NMP/100mL)', value: propiedades['COLI_FEC_NMP_100mL'], quality: propiedades['CALIDAD_COLI_FEC'] },
+                { name: 'E. Coli (NMP/100mL)', value: propiedades['E_COLI_NMP_100mL'], quality: propiedades['CALIDAD_E_COLI'] },
+                { name: 'Oxígeno Disuelto (%)', value: propiedades['OD_PORC'], quality: propiedades['CALIDAD_OD_PORC'] },
+                { name: 'Toxicidad Directa (48h)', value: propiedades['TOX_D_48_UT'], quality: propiedades['CALIDAD_TOX_D_48'] },
+                { name: 'Toxicidad Vegetativa (15h)', value: propiedades['TOX_V_15_UT'], quality: propiedades['CALIDAD_TOX_V_15'] }
+            ];
+            
+            parametros.forEach(param => {
+                if (param.value && param.value !== "") {
+                    infoHTML += `
+                        <div class="parameter-row">
+                            <span class="parameter-name">${param.name}:</span>
+                            <span class="parameter-value">${param.value} 
+                                <small>(${param.quality})</small>
+                            </span>
+                        </div>
+                    `;
+                }
+            });
+            
+            document.getElementById('waterBodyInfo').innerHTML = infoHTML;
+            
+            // Determine if water is suitable for different uses
+            const aptaPara = [];
+            if (propiedades.SEMAFORO === 'Verde') {
+                aptaPara.push('Consumo humano con tratamiento básico', 'Riego', 'Recreación');
+                document.getElementById('aptaStatus').textContent = 'Apta con tratamiento';
+                document.getElementById('aptaStatus').className = 'parameter-value quality-good';
+            } else if (propiedades.SEMAFORO === 'Amarillo') {
+                aptaPara.push('Riego con precaución', 'Usos industriales');
+                document.getElementById('aptaStatus').textContent = 'Apta con restricciones';
+                document.getElementById('aptaStatus').className = 'parameter-value quality-moderate';
+            } else {
+                document.getElementById('aptaStatus').textContent = 'No apta para uso humano';
+                document.getElementById('aptaStatus').className = 'parameter-value quality-bad';
+            }
+            
+            // Add treatment recommendations based on contaminants
+            let stepsHTML = '';
+            const contaminantes = (propiedades.CONTAMINANTES || '').split(',');
+            
+            if (contaminantes.includes('CF') || contaminantes.includes('EC')) {
+                stepsHTML += `
+                    <div class="step-card">
+                        <div class="step-title">1. Desinfección</div>
+                        <div class="step-desc">
+                            Se detectaron coliformes fecales o E. coli. Recomendamos:
+                            <ul>
+                                <li>Cloración (1-2 mg/L de cloro libre residual)</li>
+                                <li>Filtración con carbón activado para remover subproductos de desinfección</li>
+                                <li>Considerar luz UV para eliminación de patógenos</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (parseFloat(propiedades['DBO_mg/L'] || 0) > 30 || parseFloat(propiedades['DQO_mg/L'] || 0) > 40) {
+                stepsHTML += `
+                    <div class="step-card">
+                        <div class="step-title">2. Tratamiento de materia orgánica</div>
+                        <div class="step-desc">
+                            Niveles elevados de materia orgánica detectados. Recomendamos:
+                            <ul>
+                                <li>Coagulación-floculación con sulfato de aluminio o cloruro férrico</li>
+                                <li>Filtración lenta en arena para remoción de partículas</li>
+                                <li>Considerar humedales artificiales para tratamiento natural</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (parseFloat(propiedades['SST_mg/L'] || 0) > 50) {
+                stepsHTML += `
+                    <div class="step-card">
+                        <div class="step-title">3. Remoción de sólidos</div>
+                        <div class="step-desc">
+                            Altos niveles de sólidos suspendidos. Recomendamos:
+                            <ul>
+                                <li>Sedimentación primaria con tiempo de retención de 2-4 horas</li>
+                                <li>Filtros multimedia (arena, antracita, grava)</li>
+                                <li>Membranas de microfiltración para partículas finas</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (stepsHTML === '') {
+                stepsHTML = '<p>Basado en los parámetros medidos, no se detectaron contaminantes que requieran tratamiento especial.</p>';
+            }
+            
+            document.getElementById('stepsContainer').innerHTML = stepsHTML;
+            
+            // Add educational information
+            let additionalHTML = `
+                <div class="mt-3">
+                    <h5><i class="fas fa-graduation-cap"></i> Información Educativa</h5>
+                    <p><strong>Contaminantes detectados:</strong> ${propiedades.CONTAMINANTES || 'Ninguno'}</p>
+                    <p><strong>Riesgos:</strong> ${getRisksInfo(propiedades)}</p>
+                    <p><strong>Tecnologías recomendadas:</strong> ${getTechInfo(propiedades)}</p>
+                    <p><strong>Importancia de conservación:</strong> ${getConservationInfo(tipo)}</p>
+                </div>
+            `;
+            
+            document.getElementById('additionalInfo').innerHTML = additionalHTML;
+            
+            // Show the panel
+            document.getElementById('infoPanel').style.display = 'block';
+            document.getElementById('infoPanel').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // Buscador
-        document.getElementById('buscadorSitio').addEventListener('input', function(e) {
-            const search = e.target.value.toLowerCase();
-            // Filtrar y actualizar capa (ajustar en mapaRios)
+        // Helper functions for educational information
+        function getRisksInfo(props) {
+            const risks = [];
+            if (props['COLI_FEC_NMP_100mL'] > 200 || props['E_COLI_NMP_100mL'] > 100) {
+                risks.push('Riesgo de enfermedades gastrointestinales');
+            }
+            if (parseFloat(props['DBO_mg/L'] || 0) > 30) {
+                risks.push('Posible agotamiento de oxígeno en el agua');
+            }
+            if (props['TOX_D_48_UT'] > 1 || props['TOX_V_15_UT'] > 1) {
+                risks.push('Posible toxicidad para organismos acuáticos');
+            }
+            return risks.length > 0 ? risks.join(', ') : 'Bajo riesgo según parámetros medidos';
+        }
+
+        function getTechInfo(props) {
+            const techs = [];
+            if (props['COLI_FEC_NMP_100mL'] > 200) {
+                techs.push('Desinfección UV');
+            }
+            if (parseFloat(props['DBO_mg/L'] || 0) > 30) {
+                techs.push('Reactores biológicos');
+            }
+            if (parseFloat(props['SST_mg/L'] || 0) > 50) {
+                techs.push('Filtración multimedia');
+            }
+            return techs.length > 0 ? techs.join(', ') : 'Tratamiento convencional suficiente';
+        }
+
+        function getConservationInfo(tipo) {
+            if (tipo.includes('Río')) {
+                return 'Los ríos son ecosistemas vitales que conectan diferentes hábitats. Su conservación es crucial para mantener la biodiversidad y proveer agua para comunidades.';
+            } else {
+                return 'Los cuerpos de agua lénticos (lagos, lagunas) son importantes reservorios de agua dulce y hábitats para especies acuáticas. Su protección ayuda a mantener el equilibrio ecológico.';
+            }
+        }
+
+        // Close the info panel
+        function cerrarPanel() {
+            document.getElementById('infoPanel').style.display = 'none';
+        }
+
+        // Get user location
+        function obtenerUbi() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        currentLocation = [position.coords.latitude, position.coords.longitude];
+                        map.setView(currentLocation, 13);
+                        
+                        if (ubicacionMarker) {
+                            map.removeLayer(ubicacionMarker);
+                        }
+                        
+                        ubicacionMarker = L.marker(currentLocation, {
+                            icon: L.divIcon({
+                                className: 'user-location-marker',
+                                html: '<i class="fas fa-user" style="color: #0077b6; font-size: 24px;"></i>',
+                                iconSize: [24, 24]
+                            })
+                        }).addTo(map)
+                        .bindPopup('Tu ubicación actual').openPopup();
+                    },
+                    function(error) {
+                        console.error("Error al obtener ubicación:", error);
+                        alert("No se pudo obtener tu ubicación. Usando ubicación predeterminada.");
+                    }
+                );
+            } else {
+                alert("La geolocalización no está soportada en tu navegador.");
+            }
+        }
+
+        // Search functionality
+        document.getElementById('searchButton').addEventListener('click', function() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (query) {
+                // This would be replaced with actual search functionality
+                alert(`Buscando: ${query}. Esta funcionalidad se implementará completamente en la versión final.`);
+            }
         });
 
-        mapaRios();
-        // Código para obtener ubicación (como antes)
+        // Initialize the map when the page loads
+        window.onload = initMap;
     </script>
 </body>
 </html>
