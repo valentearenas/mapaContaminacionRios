@@ -1,146 +1,133 @@
-<!DOCTYPE html>
-<html lang="en">
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RITEC</title>
+    <title>Bug Busters - Protege el Agua</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            min-height: 100vh;
-            max-height: 100vh;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden; /* Evita scroll en toda la página */
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
-            display: flex;
-            flex-direction: column;
-        }
-        .menu-superior {
-            width: 100%;
-            background: #0E51FA;
-            color: #fff;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            flex-shrink: 0;
-        }
-        .logo-menu {
-            padding: 10px 30px;
-            display: flex;
-            align-items: center;
-        }
-        .logo-menu img {
-            width: 120px;
-            height: auto;
-            display: block;
-        }
-        .menu-superior nav ul {
-            display: flex;
-            list-style: none;
-            margin: 0;
-            padding: 0 30px 0 0;
-        }
-        .menu-superior nav ul li {
-            margin: 0 20px;
-        }
-        .menu-superior nav ul li a {
-            color: #fff;
-            text-decoration: none;
-            font-size: 1.1rem;
-            font-weight: bold;
-            padding: 20px 0;
-            display: block;
-            transition: background 0.2s, color 0.2s;
-        }
-        .menu-superior nav ul li a:hover {
-            color: #00FA0E;
-        }
-        .contenedor-informacion {
-            max-width: 900px;
-            width: 100%;
-            margin: 20px auto; /* Margen igual en todos los lados */
-            background: #fff;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            flex: 1 1 auto;
-            max-height: calc(100vh - 40px - 70px); /* Ajusta alto restando margen y menú */
-            overflow: auto;
-        }
-        .logo {
-            margin-bottom: 20px;
-        }
-        .logo img {
-            width: 180px; /* Aumenta el tamaño del logo en el contenido */
-            height: auto;
-        }
-        .txt-sobre-pagina {
-            font-size: 0.95rem; /* Letra más pequeña */
-            color: #333;
-            max-width: 600px;
-            text-align: center;
-            background: #f9f9f9;
-            padding: 15px 10px; /* Reduce padding */
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
+        body { background-color: #f0f8ff; font-family: 'Arial', sans-serif; }
+        .hero { background: linear-gradient(to right, #007bff, #00bfff); color: white; padding: 60px 0; text-align: center; }
+        .card { margin: 20px 0; border: none; box-shadow: 0 4px 8px rgba(0,0,0,0.1); transition: transform 0.3s; }
+        .card:hover { transform: translateY(-5px); }
+        .stats { font-weight: bold; color: #dc3545; }
     </style>
 </head>
 <body>
-    <div class="menu-superior">
-        <div class="logo-menu">
-            <img src="logo.png" alt="LOGO" />
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">Bug Busters</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="mapaContaminacion.html">MAPA</a></li>
+                    <li class="nav-item"><a class="nav-link" href="comoUsar.html">CÓMO USAR</a></li>
+                    <li class="nav-item"><a class="nav-link" href="tablaRios.html">TABLA RIOS</a></li>
+                    <li class="nav-item"><a class="nav-link" href="juego.html">JUEGA Y APRENDE</a></li> <!-- Placeholder para tu juego -->
+                </ul>
+            </div>
         </div>
-        <nav>
-            <ul>
-                <li>
-                    <a href="mapaContaminacion.html">MAPA</a>
-                </li>
-                <li>
-                    <a href="comoUsar.html">CÓMO USAR</a>
-                </li>
-                <li>
-                    <a href="tabla.php">TABLA RIOS</a>
-                </li>
-            </ul>
-        </nav>
-    </div>
-    <div class="contenedor-informacion">
-        <div class="logo">
-            <img src="logo.png" alt="LOGO">
+    </nav>
+
+    <div class="hero">
+        <div class="container">
+            <h1 class="display-4">Bug Busters: Cuidemos Cada Gota</h1>
+            <p class="lead">Nuestra misión es fomentar la cultura hídrica con herramientas digitales para monitorear y proteger el agua.</p>
+            <a href="mapaContaminacion.html" class="btn btn-light btn-lg">Explora el Mapa Interactivo</a>
         </div>
-        <div class="txt-sobre-pagina">
-    <!-- <h2 style="color:#0096FA; margin-top:0; font-size:1.1rem;">Nuestra Misión</h2> -->
-    <p style="margin: 8px 0 14px 0; font-size:0.92rem;">
-        <strong style="color:#0E51FA;">Bug Busters</strong> cree que el futuro del planeta empieza con cada gota.<br>
-        Nuestra misión es <b>fomentar la cultura hídrica</b>, empoderando a la comunidad con herramientas digitales para cuidar ríos, lagos y cuerpos de agua en su entorno.
-    </p>
-    <div style="font-size:0.92rem; margin-bottom:10px;">
-        <span style="font-size:1.1em;">🌍</span>
-        <b>Mapa interactivo:</b> Explora los ríos y lagos de tu zona, ingresa los niveles de <b>pH</b> del agua que detectes y contribuye a una base de datos colaborativa para el monitoreo del agua.
     </div>
-    <div style="font-size:0.92rem; margin-bottom:10px;">
-        <span style="font-size:1.1em;">💧</span>
-        <b>¿El río está contaminado?</b> ¡No te preocupes! Te mostramos cómo construir <b>filtros caseros</b> adaptados al tipo de contaminación detectada y te damos acceso a opciones de compra confiables para filtros profesionales.
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">🌍 Mapa Interactivo</h5>
+                        <p class="card-text">Explora ríos y lagos, ve la calidad del agua y contribuye con datos.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">💧 Filtros para el Agua</h5>
+                        <p class="card-text">Aprende a filtrar agua contaminada y accede a recomendaciones personalizadas.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">🔬 Comunidad Consciente</h5>
+                        <p class="card-text">Únete a una red para prevenir contaminación y recuperar fuentes hídricas.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-4">
+            <h4>Estadísticas Actuales</h4>
+            <p id="totalSitios" class="stats">Total de sitios: Cargando...</p>
+            <p id="sitiosContaminados" class="stats">Sitios contaminados: Cargando...</p>
+            <p class="text-muted">¡El 70% de los ríos en México están contaminados! Únete para cambiar esto.<grok:render card_id="d0c5da" card_type="citation_card" type="render_inline_citation">
+<argument name="citation_id">25</argument>
+</grok:render></p>
+            <a href="comoUsar.html" class="btn btn-outline-primary">Aprende Más</a>
+        </div>
     </div>
-    <div style="font-size:0.92rem;">
-        <span style="font-size:1.1em;">🔬</span>
-        <b>Juntos, comunidad y tecnología</b>, podemos prevenir la contaminación, recuperar nuestras fuentes de agua y formar una red de usuarios conscientes y comprometidos.
-    </div>
-</div>
-    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Cargar estadísticas dinámicas
+        fetch('Calidad_del_Agua_Superficial_p.json')
+            .then(res => res.json())
+            .then(data => {
+                const total = data.features.length;
+                const contaminados = data.features.filter(f => f.properties.SEMAFORO === 'Rojo').length;
+                document.getElementById('totalSitios').textContent = `Total de sitios: ${total}`;
+                document.getElementById('sitiosContaminados').textContent = `Sitios contaminados: ${contaminados}`;
+            })
+            .catch(error => console.error('Error cargando datos:', error));
+    </script>
 </body>
 </html>
