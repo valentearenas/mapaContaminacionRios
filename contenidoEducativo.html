@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educación sobre Calidad del Agua | AquaGuard</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e6f7ff 0%, #f0f9ff 100%);
+        }
+        .menu-superior {
+            width: 100vw;
+            background: linear-gradient(90deg, #0077b6 0%, #00b4d8 100%);
+            color: #fff;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+            position: relative;
+            z-index: 2;
+        }
+        .logo-menu {
+            padding: 10px 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .logo-menu img {
+            width: 120px;
+            height: auto;
+            display: block;
+            filter: drop-shadow(0 2px 8px #00b4d8aa);
+            transition: transform 0.3s;
+        }
+        .logo-menu img:hover {
+            transform: scale(1.08) rotate(-2deg);
+        }
+        .menu-superior nav ul {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0 30px 0 0;
+            gap: 10px;
+        }
+        .menu-superior nav ul li {
+            margin: 0 16px;
+        }
+        .menu-superior nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 20px 0;
+            display: block;
+            transition: all 0.3s cubic-bezier(.4,2,.3,1);
+            border-bottom: 2px solid transparent;
+            letter-spacing: 1px;
+            position: relative;
+        }
+        .menu-superior nav ul li a::after {
+            content: '';
+            display: block;
+            width: 0;
+            height: 2px;
+            background: #90e0ef;
+            transition: width .3s;
+            position: absolute;
+            left: 0;
+            bottom: 0;
+        }
+        .menu-superior nav ul li a:hover {
+            color: #90e0ef;
+        }
+        .menu-superior nav ul li a:hover::after {
+            width: 100%;
+        }
+        .educativo-container {
+            max-width: 1100px;
+            margin: 40px auto 30px auto;
+            background: rgba(255,255,255,0.97);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,180,216,0.10);
+            padding: 40px 30px;
+        }
+        h1, h2 {
+            color: #0077b6;
+            text-align: center;
+            margin-bottom: 18px;
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+        h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+        .section {
+            margin-bottom: 32px;
+        }
+        ul {
+            margin-left: 18px;
+        }
+        .contaminante {
+            margin-bottom: 12px;
+        }
+        .contaminante strong {
+            color: #00b4d8;
+        }
+        .contact-section {
+            width: 100vw;
+            background: linear-gradient(90deg, #00b4d8 0%, #0077b6 100%);
+            color: #fff;
+            text-align: center;
+            padding: 32px 0 24px 0;
+            margin-top: 0;
+            font-size: 1.08rem;
+            letter-spacing: 0.5px;
+            border-radius: 0 0 20px 20px;
+        }
+        .contact-section h4 {
+            margin-bottom: 12px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #caf0f8;
+        }
+        .contact-section a {
+            color: #90e0ef;
+            text-decoration: underline;
+            margin: 0 8px;
+        }
+        @media (max-width: 700px) {
+            .educativo-container {
+                padding: 18px 8px;
+            }
+            .logo-menu img {
+                width: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-superior">
+        <div class="logo-menu">
+            <img src="logo.png" alt="AquaGuard Logo" />
+            <span style="font-size:1.3rem; font-weight:700; letter-spacing:1px; color:#90e0ef; text-shadow:0 2px 8px #0077b688;">AquaGuard</span>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Hogar</a></li>
+                <li><a href="mapaContaminacion.html">Mapa</a></li>
+                <li><a href="contenidoEducativo.html">Educación</a></li>
+                <li><a href="comoUsar.html">Cómo Usar</a></li>
+                <li><a href="juego.html">Juego</a></li>
+            </ul>
+        </nav>
+    </div>
+    <div class="educativo-container">
+        <h1>Información Educativa sobre Calidad del Agua</h1>
+        <div class="section">
+            <h2>¿Qué son los cuerpos de agua?</h2>
+            <p>
+                Los cuerpos de agua superficiales son ríos, lagos, lagunas, arroyos y presas que se encuentran en la superficie terrestre. Son esenciales para el abastecimiento de agua, el equilibrio ecológico y la vida de plantas, animales y seres humanos.
+            </p>
+            <ul>
+                <li><strong>Ríos y arroyos:</strong> Corrientes de agua que fluyen de zonas altas a bajas.</li>
+                <li><strong>Lagos y lagunas:</strong> Acumulaciones de agua en depresiones naturales.</li>
+                <li><strong>Presas:</strong> Estructuras artificiales para almacenar agua.</li>
+            </ul>
+        </div>
+        <div class="section">
+            <h2>Principales usos del agua superficial</h2>
+            <ul>
+                <li>Consumo humano (potabilización)</li>
+                <li>Riego agrícola</li>
+                <li>Industria</li>
+                <li>Recreación y turismo</li>
+                <li>Conservación de ecosistemas</li>
+            </ul>
+        </div>
+        <div class="section">
+            <h2>Contaminantes comunes en cuerpos de agua</h2>
+            <div class="contaminante">
+                <strong>Coliformes Fecales (CF):</strong> Bacterias indicadoras de contaminación por heces, pueden causar enfermedades gastrointestinales.
+            </div>
+            <div class="contaminante">
+                <strong>E. Coli (EC):</strong> Bacteria presente en heces, su presencia indica contaminación y riesgo sanitario.
+            </div>
+            <div class="contaminante">
+                <strong>Demanda Bioquímica de Oxígeno (DBO):</strong> Indica la cantidad de materia orgánica biodegradable en el agua.
+            </div>
+            <div class="contaminante">
+                <strong>Demanda Química de Oxígeno (DQO):</strong> Mide la cantidad total de materia orgánica y algunos inorgánicos.
+            </div>
+            <div class="contaminante">
+                <strong>Sólidos Suspendidos Totales (SST):</strong> Partículas sólidas presentes en el agua, afectan la claridad y calidad.
+            </div>
+            <div class="contaminante">
+                <strong>Oxígeno Disuelto (OD):</strong> Cantidad de oxígeno disponible en el agua para organismos acuáticos.
+            </div>
+            <div class="contaminante">
+                <strong>Toxicidad Directa (TOX D):</strong> Indica la toxicidad aguda para organismos en 48 horas.
+            </div>
+            <div class="contaminante">
+                <strong>Toxicidad Vegetativa (TOX V):</strong> Indica la toxicidad para vegetales en 15 horas.
+            </div>
+        </div>
+        <div class="section">
+            <h2>¿Cómo afecta la contaminación del agua?</h2>
+            <ul>
+                <li>Enfermedades en humanos y animales</li>
+                <li>Pérdida de biodiversidad</li>
+                <li>Dificultad para potabilizar el agua</li>
+                <li>Alteración de ecosistemas acuáticos</li>
+                <li>Problemas económicos y sociales</li>
+            </ul>
+        </div>
+        <div class="section">
+            <h2>¿Cómo podemos cuidar los cuerpos de agua?</h2>
+            <ul>
+                <li>No tirar basura ni sustancias tóxicas en ríos y lagos</li>
+                <li>Evitar el uso excesivo de fertilizantes y pesticidas</li>
+                <li>Participar en jornadas de limpieza y conservación</li>
+                <li>Informarse y educar sobre la importancia del agua</li>
+                <li>Reportar descargas ilegales o contaminación</li>
+            </ul>
+        </div>
+    </div>
+    <div class="contact-section">
+        <h4>Contacto</h4>
+        <p>
+            ¿Tienes dudas, sugerencias o quieres colaborar? <br>
+            Escríbenos a <a href="mailto:info@aquaguard.mx">info@aquaguard.mx</a> <br>
+            Síguenos en 
+            <a href="https://facebook.com/aquaguard" target="_blank">Facebook</a> | 
+            <a href="https://twitter.com/aquaguard" target="_blank">Twitter</a> | 
+            <a href="https://instagram.com/aquaguard" target="_blank">Instagram</a>
+        </p>
+        <p>
+            © 2025 AquaGuard. Todos los derechos reservados.
+        </p>
+    </div>
+</body>
+</html>

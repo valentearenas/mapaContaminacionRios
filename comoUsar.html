@@ -1,243 +1,337 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cómo Usar AquaGuard</title>
-    <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            min-height: 100vh;
-            max-height: 100vh;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #e6f7ff 0%, #f0f9ff 100%);
-            display: flex;
-            flex-direction: column;
-        }
-        .menu-superior {
-            width: 100%;
-            background: #0077b6;
-            color: #fff;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-            flex-shrink: 0;
-        }
-        .logo-menu {
-            padding: 10px 30px;
-            display: flex;
-            align-items: center;
-        }
-        .logo-menu img {
-            width: 70px;
-            height: auto;
-            display: block;
-        }
-        .menu-superior nav ul {
-            display: flex;
-            list-style: none;
-            margin: 0;
-            padding: 0 30px 0 0;
-        }
-        .menu-superior nav ul li {
-            margin: 0 20px;
-        }
-        .menu-superior nav ul li a {
-            color: #fff;
-            text-decoration: none;
-            font-size: 1.1rem;
-            font-weight: 600;
-            padding: 20px 0;
-            display: block;
-            transition: all 0.3s ease;
-            border-bottom: 2px solid transparent;
-        }
-        .menu-superior nav ul li a:hover {
-            color: #90e0ef;
-            border-bottom: 2px solid #90e0ef;
-        }
-        .contenedor-informacion {
-            max-width: 900px;
-            width: 100%;
-            margin: 20px auto;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            flex: 1 1 auto;
-            max-height: calc(100vh - 40px - 70px);
-            overflow: auto;
-        }
-        .logo {
-            margin-bottom: 25px;
-        }
-        .logo img {
-            width: 90px;
-            height: auto;
-            transition: transform 0.3s ease;
-        }
-        .logo img:hover {
-            transform: scale(1.05);
-        }
-        .txt-sobre-pagina {
-            font-size: 1rem;
-            color: #333;
-            max-width: 700px;
-            text-align: center;
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-        }
-        .pasos-lista {
-            text-align: left;
-            margin: 0 auto;
-            padding: 0;
-            max-width: 600px;
-        }
-        .pasos-lista li {
-            margin-bottom: 20px;
-            font-size: 1rem;
-            line-height: 1.6;
-            list-style: none;
-            position: relative;
-            padding-left: 40px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #e9ecef;
-        }
-        .pasos-lista li::before {
-            content: attr(data-icon);
-            position: absolute;
-            left: 0;
-            top: 0;
-            font-size: 1.5em;
-            color: #0077b6;
-        }
-        .pasos-titulo {
-            color: #0077b6;
-            font-size: 1.2rem;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-        .pasos-desc {
-            color: #555;
-        }
-        .video-container {
-            margin-top: 30px;
-            width: 100%;
-            max-width: 600px;
-        }
-        .video-container iframe {
-            width: 100%;
-            height: 340px;
-            border-radius: 10px;
-            border: none;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        .water-wave {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 100px;
-            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" fill="%230077b6" opacity=".25"/><path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" fill="%230077b6" opacity=".5"/><path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" fill="%230077b6"/></svg>');
-            background-size: cover;
-            z-index: -1;
-        }
-    </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
-    <div class="menu-superior">
-        <div class="logo-menu">
-            <img src="logo.png" alt="AquaGuard Logo" />
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Cómo usar AquaGuard</title>
+        <style>
+            html, body {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                min-height: 100vh;
+                max-height: 100vh;
+                height: 100vh;
+                width: 100vw;
+                overflow: hidden;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: url('imagenes/fondoAgua.jpg') no-repeat center center fixed;
+                background-size: cover;
+                display: flex;
+                flex-direction: column;
+            }
+            .menu-superior {
+                width: 100%;
+                background: linear-gradient(90deg, #0077b6 0%, #00b4d8 100%);
+                color: #fff;
+                padding: 0;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+                flex-shrink: 0;
+                position: relative;
+                z-index: 2;
+            }
+            .logo-menu {
+                padding: 10px 30px;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                animation: fadeInLeft 1s;
+            }
+            .logo-menu img {
+                width: 120px;
+                height: auto;
+                display: block;
+                filter: drop-shadow(0 2px 8px #00b4d8aa);
+                transition: transform 0.3s;
+            }
+            .logo-menu img:hover {
+                transform: scale(1.08) rotate(-2deg);
+            }
+            .menu-superior nav ul {
+                display: flex;
+                list-style: none;
+                margin: 0;
+                padding: 0 30px 0 0;
+                gap: 10px;
+            }
+            .menu-superior nav ul li {
+                margin: 0 20px;
+            }
+            .menu-superior nav ul li a {
+                color: #fff;
+                text-decoration: none;
+                font-size: 1.1rem;
+                font-weight: 600;
+                padding: 20px 0;
+                display: block;
+                transition: all 0.3s cubic-bezier(.4,2,.3,1);
+                border-bottom: 2px solid transparent;
+                letter-spacing: 1px;
+                position: relative;
+            }
+            .menu-superior nav ul li a::after {
+                content: '';
+                display: block;
+                width: 0;
+                height: 2px;
+                background: #90e0ef;
+                transition: width .3s;
+                position: absolute;
+                left: 0;
+                bottom: 0;
+            }
+            .menu-superior nav ul li a:hover {
+                color: #90e0ef;
+            }
+            .menu-superior nav ul li a:hover::after {
+                width: 100%;
+            }
+            .contenedor-informacion {
+                max-width: 1000px;
+                width: 100%;
+                margin: 30px auto 20px auto;
+                background: rgba(255, 255, 255, 0.95);
+                padding: 40px 30px 30px 30px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                border-radius: 20px;
+                box-shadow: 0 8px 32px rgba(0,180,216,0.10);
+                flex: 1 1 auto;
+                max-height: calc(100vh - 60px - 100px);
+                overflow: auto;
+                animation: fadeInUp 1.2s;
+            }
+            .logo {
+                margin-bottom: 25px;
+                animation: bounceIn 1.1s;
+            }
+            .logo img {
+                width: 180px;
+                height: auto;
+                transition: transform 0.3s ease;
+                filter: drop-shadow(0 4px 16px #0077b6aa);
+            }
+            .logo img:hover {
+                transform: scale(1.07) rotate(2deg);
+            }
+            .txt-sobre-pagina {
+                font-size: 1rem;
+                color: #333;
+                max-width: 700px;
+                text-align: center;
+                background: linear-gradient(120deg, #f8f9fa 80%, #e6f7ff 100%);
+                padding: 30px;
+                border-radius: 16px;
+                box-shadow: 0 6px 24px rgba(0,180,216,0.08);
+                margin-bottom: 10px;
+            }
+            .txt-sobre-pagina h2 {
+                color: #0077b6;
+                margin-top: 0;
+                font-size: 2rem;
+                letter-spacing: 1px;
+                font-weight: 700;
+                text-shadow: 0 2px 8px #90e0ef44;
+            }
+            .features-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 25px;
+                margin-top: 35px;
+                width: 100%;
+            }
+            .feature-card {
+                background: linear-gradient(120deg, #e6f7ff 60%, #fff 100%);
+                padding: 24px 18px;
+                border-radius: 14px;
+                box-shadow: 0 6px 24px rgba(0,180,216,0.10);
+                transition: transform 0.3s cubic-bezier(.4,2,.3,1), box-shadow 0.3s;
+                text-align: center;
+                position: relative;
+                overflow: hidden;
+            }
+            .feature-card:hover {
+                transform: translateY(-8px) scale(1.04);
+                box-shadow: 0 16px 32px rgba(0,180,216,0.18);
+                background: linear-gradient(120deg, #90e0ef 60%, #fff 100%);
+            }
+            .feature-icon {
+                font-size: 2.7rem;
+                margin-bottom: 15px;
+                color: #00b4d8;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 48px;
+                margin-top: 8px;
+                margin-bottom: 18px;
+                /* Sombra y fondo suave */
+                background: rgba(144, 224, 239, 0.18);
+                border-radius: 50%;
+                box-shadow: 0 4px 16px rgba(0, 119, 182, 0.18);
+                padding: 10px;
+                transition: box-shadow 0.3s;
+            }
+            .feature-card:hover .feature-icon {
+                box-shadow: 0 8px 24px rgba(0, 119, 182, 0.28);
+                background: rgba(144, 224, 239, 0.28);
+            }
+
+            .feature-title {
+                color: #0077b6;
+                font-weight: 700;
+                margin-bottom: 10px;
+                font-size: 1.15rem;
+                letter-spacing: 0.5px;
+            }
+            .cta-button {
+                background: linear-gradient(90deg, #00b4d8 60%, #0077b6 100%);
+                color: white;
+                border: none;
+                padding: 14px 32px;
+                border-radius: 30px;
+                font-size: 1.1rem;
+                font-weight: 700;
+                cursor: pointer;
+                transition: all 0.3s cubic-bezier(.4,2,.3,1);
+                margin-top: 30px;
+                box-shadow: 0 6px 16px rgba(0,180,216,0.25);
+                letter-spacing: 1px;
+                position: relative;
+                overflow: hidden;
+            }
+            .cta-button::after {
+                content: '';
+                position: absolute;
+                left: 0; top: 0;
+                width: 100%; height: 100%;
+                background: linear-gradient(90deg, #90e0ef44 0%, #00b4d822 100%);
+                opacity: 0;
+                transition: opacity 0.3s;
+                border-radius: 30px;
+                z-index: 0;
+            }
+            .cta-button:hover {
+                background: linear-gradient(90deg, #0096c7 60%, #0077b6 100%);
+                transform: translateY(-2px) scale(1.03);
+                box-shadow: 0 12px 24px rgba(0,180,216,0.32);
+            }
+            .cta-button:hover::after {
+                opacity: 1;
+            }
+            .water-wave {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 100px;
+                background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" fill="%230077b6" opacity=".25"/><path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39 116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" fill="%230077b6" opacity=".5"/><path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" fill="%230077b6"/></svg>');
+                background-size: cover;
+                z-index: -1;
+                animation: waveMove 8s linear infinite;
+            }
+            @keyframes fadeInLeft {
+                from { opacity: 0; transform: translateX(-40px);}
+                to { opacity: 1; transform: translateX(0);}
+            }
+            @keyframes fadeInUp {
+                from { opacity: 0; transform: translateY(40px);}
+                to { opacity: 1; transform: translateY(0);}
+            }
+            @keyframes bounceIn {
+                0% { transform: scale(0.8);}
+                60% { transform: scale(1.1);}
+                80% { transform: scale(0.95);}
+                100% { transform: scale(1);}
+            }
+            @keyframes waveMove {
+                0% { background-position-x: 0;}
+                100% { background-position-x: 1200px;}
+            }
+            @media (max-width: 700px) {
+                .contenedor-informacion {
+                    padding: 18px 8px;
+                }
+                .features-grid {
+                    grid-template-columns: 1fr;
+                    gap: 18px;
+                }
+                .logo img {
+                    width: 120px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="menu-superior">
+            <div class="logo-menu">
+                <img src="logo.png" alt="AquaGuard Logo" />
+                <span style="font-size:1.3rem; font-weight:700; letter-spacing:1px; color:#90e0ef; text-shadow:0 2px 8px #0077b688;">AquaGuard</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Hogar</a></li>
+                    <li><a href="mapaContaminacion.html">Mapa</a></li>
+                    <li><a href="contenidoEducativo.html">Educación</a></li>
+                    <li><a href="comoUsar.html">Cómo Usar</a></li>
+                    <li><a href="juego.html">Juego</a></li>
+                </ul>
+            </nav>
         </div>
-        <nav>
-            <ul>
-                <li>
-                    <a href="mapaContaminacion.html">MAPA</a>
-                </li>
-                <li>
-                    <a href="comoUsar.html">CÓMO USAR</a>
-                </li>
-                <li>
-                    <a href="tabla.php">TABLA RIOS</a>
-                </li>
-            </ul>
-        </nav>
-    </div>
-    <div class="contenedor-informacion">
-        <div class="logo">
-            <img src="logo.png" alt="AquaGuard Logo">
-        </div>
-        <div class="txt-sobre-pagina">
-            <h2 style="color:#0077b6; margin-top:0; font-size:1.5rem;">Guía para usar AquaGuard</h2>
-            <p style="margin: 15px 0 25px 0; font-size:1.05rem; line-height:1.6;">
-                AquaGuard es una plataforma diseñada para monitorear la calidad del agua y proporcionar soluciones. Sigue estos pasos para aprovechar al máximo sus funciones.
-            </p>
-            
-            <ul class="pasos-lista">
-                <li data-icon="🗺️">
-                    <span class="pasos-titulo">1. Explorar el mapa interactivo</span>
-                    <span class="pasos-desc">
-                        Navega por el mapa para encontrar ríos, lagos y otros cuerpos de agua cercanos a tu ubicación. 
-                        Los marcadores de colores indican la calidad del agua: <span style="color:#28a745">Verde (Buena)</span>, 
-                        <span style="color:#ffc107">Amarillo (Moderada)</span>, <span style="color:#dc3545">Rojo (Mala)</span>.
-                    </span>
-                </li>
-                <li data-icon="🔍">
-                    <span class="pasos-titulo">2. Seleccionar un cuerpo de agua</span>
-                    <span class="pasos-desc">
-                        Haz clic en cualquier marcador para ver información básica sobre ese cuerpo de agua, 
-                        incluyendo su nombre, ubicación y calidad. Usa el botón "Ver detalles completos" 
-                        para acceder a información más detallada.
-                    </span>
-                </li>
-                <li data-icon="📊">
-                    <span class="pasos-titulo">3. Analizar los datos de calidad</span>
-                    <span class="pasos-desc">
-                        En el panel de detalles, encontrarás información sobre parámetros como DBO, DQO, 
-                        coliformes fecales, oxígeno disuelto y más. Cada parámetro incluye su valor medido 
-                        y una evaluación de su calidad.
-                    </span>
-                </li>
-                <li data-icon="💧">
-                    <span class="pasos-titulo">4. Obtener recomendaciones de tratamiento</span>
-                    <span class="pasos-desc">
-                        Basado en los contaminantes detectados, AquaGuard proporciona recomendaciones 
-                        personalizadas de tratamiento, desde filtros caseros hasta sistemas profesionales, 
-                        con instrucciones detalladas para cada etapa.
-                    </span>
-                </li>
-                <li data-icon="📱">
-                    <span class="pasos-titulo">5. Contribuir con datos</span>
-                    <span class="pasos-desc">
-                        Si tienes mediciones recientes de calidad de agua, puedes contribuir a la base 
-                        de datos comunitaria para ayudar a mantener la información actualizada.
-                    </span>
-                </li>
-            </ul>
-            
-            <div class="video-container">
-                <h3 style="color:#0077b6; margin-top:30px; font-size:1.2rem;">Video Tutorial</h3>
-                <iframe src="https://www.youtube.com/embed/ejemplo" title="Tutorial AquaGuard" allowfullscreen></iframe>
+        <div class="contenedor-informacion">
+            <div class="logo">
+                <img src="logo.png" alt="AquaGuard Logo">
+            </div>
+            <div class="txt-sobre-pagina">
+                <h2>¿Cómo usar AquaGuard?</h2>
+                <p style="margin: 15px 0 20px 0; font-size:1.08rem; line-height:1.7;">
+                    Sigue estos pasos para aprovechar todas las funciones de la plataforma:
+                </p>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <!-- SVG icono de mapa -->
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="#00b4d8" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="7" width="18" height="10" rx="2" fill="#e6f7ff"/><path d="M7 7v10M17 7v10" stroke="#0077b6" stroke-width="2"/></svg>
+                        </div>
+                        <h3 class="feature-title">Explora el Mapa</h3>
+                        <p>Haz clic en "MAPA" para visualizar los cuerpos de agua y su calidad.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <!-- SVG icono de lupa -->
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="#00b4d8" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="8" fill="#e6f7ff"/><rect x="17" y="17" width="5" height="2" rx="1" fill="#0077b6" transform="rotate(45 17 17)"/></svg>
+                        </div>
+                        <h3 class="feature-title">Consulta Datos</h3>
+                        <p>Selecciona un cuerpo de agua en el mapa para ver información detallada sobre contaminantes y parámetros.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <!-- SVG icono de filtro -->
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="#00b4d8" xmlns="http://www.w3.org/2000/svg"><path d="M3 5h18l-7 8v5l-4 2v-7z" fill="#90e0ef"/><rect x="10" y="18" width="4" height="2" rx="1" fill="#0077b6"/></svg>
+                        </div>
+                        <h3 class="feature-title">Recibe Recomendaciones</h3>
+                        <p>Obtén sugerencias de filtración y cuidado según los datos de calidad del agua.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <!-- SVG icono de juego -->
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="#00b4d8" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="8" width="16" height="8" rx="4" fill="#e6f7ff"/><circle cx="8" cy="12" r="2" fill="#0077b6"/><circle cx="16" cy="12" r="2" fill="#90e0ef"/></svg>
+                        </div>
+                        <h3 class="feature-title">Juega y Aprende</h3>
+                        <p>Accede al juego educativo para aprender o reforzar tus conocimientos sobre el cuidado del agua.</p>
+                    </div>
+                </div>
+                <button class="cta-button" onclick="window.location.href='mapaContaminacion.html'">Ir al Mapa</button>
             </div>
         </div>
-    </div>
-    <div class="water-wave"></div>
-</body>
+        <div class="water-wave"></div>
+    </body>
 </html>
