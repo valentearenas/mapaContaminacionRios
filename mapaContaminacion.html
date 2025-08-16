@@ -294,6 +294,54 @@
                 height: 48px;
             }
         }
+        .nav-mobile {
+            display: none;
+            position: relative;
+        }
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 2rem;
+            padding: 10px 20px;
+            cursor: pointer;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .menu-toggle i {
+            font-size: 2.2rem;
+            pointer-events: none; /* El clic pasa al botón */
+        }
+        .mobile-menu-list {
+            display: none;
+            position: absolute;
+            right: 10px;
+            top: 50px;
+            background: #0077b6;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            flex-direction: column;
+            min-width: 160px;
+            z-index: 99;
+        }
+        .mobile-menu-list a {
+            color: #fff;
+            padding: 14px 18px;
+            text-decoration: none;
+            border-bottom: 1px solid #90e0ef;
+            display: block;
+            font-weight: 600;
+        }
+        .mobile-menu-list a:last-child {
+            border-bottom: none;
+        }
+        @media (max-width: 700px) {
+            .nav-desktop { display: none; }
+            .nav-mobile { display: block; }
+        }
     </style>
 </head>
 <body>    
@@ -302,7 +350,7 @@
             <img src="logo.png" alt="AquaGuard Logo" />
             <span style="font-size:1.3rem; font-weight:700; letter-spacing:1px; color:#90e0ef; text-shadow:0 2px 8px #0077b688;">AquaGuard</span>
         </div>
-        <nav>
+        <nav class="nav-desktop">
             <ul>
                 <li><a href="index.html">Hogar</a></li>
                 <li><a href="mapaContaminacion.html">Mapa</a></li>
@@ -311,6 +359,18 @@
                 <li><a href="juego.html">Juego</a></li>
             </ul>
         </nav>
+        <div class="nav-mobile">
+            <button id="menuToggle" class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div id="mobileMenu" class="mobile-menu-list">
+                <a href="index.html">Hogar</a>
+                <a href="mapaContaminacion.html">Mapa</a>
+                <a href="contenidoEducativo.html">Educación</a>
+                <a href="comoUsar.html">Cómo Usar</a>
+                <a href="juego.html">Juego</a>
+            </div>
+        </div>
     </div>
     <div style="width:100vw; background:linear-gradient(120deg,#f8f9fa 80%,#e6f7ff 100%); box-shadow:0 6px 24px rgba(0,180,216,0.08); text-align:center; padding:32px 0 18px 0; margin-bottom:0;">
         <h1 style="color:#0077b6; font-size:2rem; font-weight:800; margin-bottom:12px; letter-spacing:1px; text-shadow:0 2px 8px #90e0ef44;">
@@ -468,6 +528,40 @@
                 });
         }
 
+        function definicionContaminante(codigo) {
+            switch (codigo.trim().toUpperCase()) {
+                case 'DBO':
+                    return 'Demanda Bioquímica de Oxígeno (DBO): Indica la cantidad de materia orgánica biodegradable en el agua. Valores altos pueden reducir el oxígeno disponible para la vida acuática.';
+                case 'DQO':
+                    return 'Demanda Química de Oxígeno (DQO): Mide la cantidad total de materia orgánica y algunos inorgánicos presentes en el agua.';
+                case 'SST':
+                    return 'Sólidos Suspendidos Totales (SST): Partículas sólidas presentes en el agua que afectan la claridad y pueden transportar contaminantes.';
+                case 'CF':
+                case 'COLIFORMES FECALES':
+                case 'Coliformes Fecales':
+                    return 'Coliformes Fecales (CF): Bacterias indicadoras de contaminación por materia fecal, pueden causar enfermedades gastrointestinales.';
+                case 'EC':
+                case 'E.COLI':
+                case 'E. Coli':
+                    return 'E. Coli (EC): Bacteria presente en heces, su presencia indica contaminación y riesgo sanitario.';
+                case 'OD':
+                case 'OXIGENO DISUELTO':
+                case 'Oxígeno Disuelto':    
+                    return 'Oxígeno Disuelto (OD): Cantidad de oxígeno disponible en el agua para organismos acuáticos. Es esencial para la vida acuática.';
+                case 'TOX_D_48':
+                case 'TOX_D_48_UT':
+                case 'TOXICIDAD DIRECTA':
+                case 'Toxicidad Directa':    
+                    return 'Toxicidad Directa 48h: Indica la toxicidad aguda para organismos en 48 horas. Valores altos pueden afectar la fauna acuática.';
+                case 'TOX_V_15':
+                case 'TOX_V_15_UT':
+                case 'Toxicidad Vegetativa':
+                    return 'Toxicidad Vegetativa 15h: Indica la toxicidad para vegetales en 15 horas. Valores altos pueden afectar la flora acuática.';
+                default:
+                    return '';
+            }
+        }
+
         function mostrarDetalles(nombre, tipo, propiedades) {
             document.getElementById('waterBodyTitle').textContent = `${tipo}: ${nombre}`;
             //Se construye el HTML para mostrar la información del cuerpo de agua
@@ -496,9 +590,17 @@
                 { name: 'SST (mg/L)', value: propiedades['SST_mg/L'], quality: propiedades['CALIDAD_SST'] },
                 { name: 'Coliformes Fecales (NMP/100mL)', value: propiedades['COLI_FEC_NMP_100mL'], quality: propiedades['CALIDAD_COLI_FEC'] },
                 { name: 'E. Coli (NMP/100mL)', value: propiedades['E_COLI_NMP_100mL'], quality: propiedades['CALIDAD_E_COLI'] },
+                { name: 'Enterococos (NMP/100mL)', value: propiedades['ENTEROC_NMP_100mL'], quality: propiedades['CALIDAD_ENTEROC'] },
                 { name: 'Oxígeno Disuelto (%)', value: propiedades['OD_PORC'], quality: propiedades['CALIDAD_OD_PORC'] },
-                { name: 'Toxicidad Directa (48h)', value: propiedades['TOX_D_48_UT'], quality: propiedades['CALIDAD_TOX_D_48'] },
-                { name: 'Toxicidad Vegetativa (15h)', value: propiedades['TOX_V_15_UT'], quality: propiedades['CALIDAD_TOX_V_15'] }
+                { name: 'Oxígeno Disuelto Sup (%)', value: propiedades['OD_PORC_SUP'], quality: propiedades['CALIDAD_OD_PORC_SUP'] },
+                { name: 'Oxígeno Disuelto Med (%)', value: propiedades['OD_PORC_MED'], quality: propiedades['CALIDAD_OD_PORC_MED'] },
+                { name: 'Oxígeno Disuelto Fon (%)', value: propiedades['OD_PORC_FON'], quality: propiedades['CALIDAD_OD_PORC_FON'] },
+                { name: 'Toxicidad Dafnia magna (48h)', value: propiedades['TOX_D_48_UT'], quality: propiedades['CALIDAD_TOX_D_48'] },
+                { name: 'Toxicidad Vibrio Fisheri (15m)', value: propiedades['TOX_V_15_UT'], quality: propiedades['CALIDAD_TOX_V_15'] },
+                { name: 'Toxicidad Dafnia magna Superficial (48h)', value: propiedades['TOX_D_48_SUP_UT'], quality: propiedades['CALIDAD TOX_D_48_SUP'] },
+                { name: 'Toxicidad Dafnia magna Fondo (48h)', value: propiedades['TOX_D_48_FON_UT'], quality: propiedades['CALIDAD_TOX_D_48_FON'] },
+                { name: 'Toxicidad Vibrio Fisheri Superficial (15m)', value: propiedades['TOX_FIS_SUP_15_UT'], quality: propiedades['CALIDAD_TOX_FIS_SUP_15'] },
+                { name: 'Toxicidad Vibrio Fisheri Fondo (15m)', value: propiedades['TOX_FIS_FON_15_UT'], quality: propiedades['CALIDAD_TOX_FIS_FON_15'] }
             ];
             //Se itera sobre los parámetros para agregarlos al HTML si tienen valor
             parametros.forEach(param => {
@@ -515,10 +617,15 @@
             });
             
             document.getElementById('waterBodyInfo').innerHTML = infoHTML;
-            //determina si el agua es apta para consumo humano, riego, recreación, etc.
+
+            //Muestra las recomendaciones de tratamiento usando la función definida
+            document.getElementById('stepsContainer').innerHTML = generarRecomendacionesTratamiento(propiedades);
+
+
+            //determina si el agua es apta para consumo humano, riego, recreación, etc. usando semaforo
             const aptaPara = [];
             if (propiedades.SEMAFORO === 'Verde') {
-                aptaPara.push('Consumo humano con tratamiento básico', 'Riego', 'Recreación');
+                aptaPara.push('Consumo humano con tratamiento', 'Riego', 'Recreación');
                 document.getElementById('aptaStatus').textContent = 'Apta con tratamiento';
                 document.getElementById('aptaStatus').className = 'parameter-value quality-good';
             } else if (propiedades.SEMAFORO === 'Amarillo') {
@@ -529,115 +636,53 @@
                 document.getElementById('aptaStatus').textContent = 'No apta para uso humano';
                 document.getElementById('aptaStatus').className = 'parameter-value quality-bad';
             }
-            //Se generan las recomendaciones de tratamiento por etspas basadas en los contaminantes detectados 
-            let stepsHTML = '';
-            const contaminantes = (propiedades.CONTAMINANTES || '').split(',');
-            
-            if (contaminantes.includes('CF') || contaminantes.includes('EC')) {
-                stepsHTML += `
-                    <div class="step-card">
-                        <div class="step-title">1. Desinfección</div>
-                        <div class="step-desc">
-                            Se detectaron coliformes fecales o E. coli. Recomendamos:
-                            <ul>
-                                <li>Cloración (1-2 mg/L de cloro libre residual)</li>
-                                <li>Filtración con carbón activado para remover subproductos de desinfección</li>
-                                <li>Considerar luz UV para eliminación de patógenos</li>
-                            </ul>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            if (parseFloat(propiedades['DBO_mg/L'] || 0) > 30 || parseFloat(propiedades['DQO_mg/L'] || 0) > 40) {
-                stepsHTML += `
-                    <div class="step-card">
-                        <div class="step-title">2. Tratamiento de materia orgánica</div>
-                        <div class="step-desc">
-                            Niveles elevados de materia orgánica detectados. Recomendamos:
-                            <ul>
-                                <li>Coagulación-floculación con sulfato de aluminio o cloruro férrico</li>
-                                <li>Filtración lenta en arena para remoción de partículas</li>
-                                <li>Considerar humedales artificiales para tratamiento natural</li>
-                            </ul>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            if (parseFloat(propiedades['SST_mg/L'] || 0) > 50) {
-                stepsHTML += `
-                    <div class="step-card">
-                        <div class="step-title">3. Remoción de sólidos</div>
-                        <div class="step-desc">
-                            Altos niveles de sólidos suspendidos. Recomendamos:
-                            <ul>
-                                <li>Sedimentación primaria con tiempo de retención de 2-4 horas</li>
-                                <li>Filtros multimedia (arena, antracita, grava)</li>
-                                <li>Membranas de microfiltración para partículas finas</li>
-                            </ul>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            if (stepsHTML === '') {
-                stepsHTML = '<p>Basado en los parámetros medidos, no se detectaron contaminantes que requieran tratamiento especial.</p>';
-            }
-            
-            document.getElementById('stepsContainer').innerHTML = stepsHTML;
-            //Se agrega información educativa adicional sobre riesgos, tecnologías y conservación
-            // Función para obtener la definición de cada contaminante
-            function definicionContaminante(codigo) {
-                switch (codigo.trim()) {
-                    case 'CF':
-                        return 'Coliformes Fecales (CF): Bacterias indicadoras de contaminación fecal, pueden causar enfermedades gastrointestinales.';
-                    case 'EC':
-                        return 'E. Coli (EC): Bacteria presente en heces, su presencia indica contaminación y riesgo sanitario.';
-                    case 'DBO':
-                        return 'Demanda Bioquímica de Oxígeno (DBO): Indica la cantidad de materia orgánica biodegradable en el agua.';
-                    case 'DQO':
-                        return 'Demanda Química de Oxígeno (DQO): Mide la cantidad total de materia orgánica y algunos inorgánicos.';
-                    case 'SST':
-                        return 'Sólidos Suspendidos Totales (SST): Partículas sólidas presentes en el agua, afectan la claridad y calidad.';
-                    case 'OD':
-                        return 'Oxígeno Disuelto (OD): Cantidad de oxígeno disponible en el agua para organismos acuáticos.';
-                    case 'TOX_D_48':
-                        return 'Toxicidad Directa 48h: Indica la toxicidad aguda para organismos en 48 horas.';
-                    case 'TOX_V_15':
-                        return 'Toxicidad Vegetativa 15h: Indica la toxicidad para vegetales en 15 horas.';
-                    default:
-                        return '';
-                }
-            }
 
-            const contaminantesDetectados = (propiedades.CONTAMINANTES || '').split(',').map(c => c.trim()).filter(c => c);
+            // Genera definiciones de parámetros detectados
             let definicionesHTML = '';
-            if (contaminantesDetectados.length > 0) {
+            const definicionesParametros = {
+                "DBO (mg/L)": "Demanda Bioquímica de Oxígeno: cantidad de oxígeno requerido por microorganismos para descomponer materia orgánica biodegradable. Valores altos indican contaminación orgánica.",
+                "DQO (mg/L)": "Demanda Química de Oxígeno: cantidad de oxígeno necesario para oxidar materia orgánica e inorgánica. Valores altos indican presencia de contaminantes difíciles de degradar.",
+                "SST (mg/L)": "Sólidos Suspendidos Totales: partículas sólidas en suspensión en el agua. Afectan la claridad y pueden transportar otros contaminantes.",
+                "Coliformes Fecales (NMP/100mL)": "Coliformes fecales: bacterias indicadoras de contaminación por materia fecal. Su presencia implica riesgo sanitario.",
+                "E. Coli (NMP/100mL)": "Escherichia coli: bacteria indicadora de contaminación fecal. Puede causar enfermedades gastrointestinales.",
+                "Enterococos (NMP/100mL)": "Enterococos: bacterias presentes en el tracto intestinal, usadas como indicador de contaminación fecal en agua.",
+                "Oxígeno Disuelto (%)": "Oxígeno disuelto: porcentaje de saturación de oxígeno en el agua, esencial para la vida acuática. Valores bajos afectan la fauna.",
+                "Oxígeno Disuelto Sup (%)": "Oxígeno disuelto en superficie: concentración de oxígeno en la capa superficial del cuerpo de agua.",
+                "Oxígeno Disuelto Med (%)": "Oxígeno disuelto en media profundidad: concentración de oxígeno en la zona media del cuerpo de agua.",
+                "Oxígeno Disuelto Fon (%)": "Oxígeno disuelto en fondo: concentración de oxígeno en la zona profunda del cuerpo de agua.",
+                "Toxicidad Dafnia magna (48h)": "Toxicidad aguda en Daphnia magna a 48 horas: evalúa el efecto tóxico directo sobre organismos acuáticos.",
+                "Toxicidad Vibrio Fisheri (15m)": "Toxicidad aguda en Vibrio fischeri a 15 minutos: evalúa el efecto tóxico sobre bacterias luminiscentes.",
+                "Toxicidad Dafnia magna Superficial (48h)": "Toxicidad directa en superficie a 48 horas: mide toxicidad en la capa superficial del agua.",
+                "Toxicidad Dafnia magna Fondo (48h)": "Toxicidad directa en fondo a 48 horas: mide toxicidad en la zona profunda del agua.",
+                "Toxicidad Vibrio Fisheri Superficial (15m)": "Toxicidad fisiológica en superficie a 15 horas: evalúa efectos fisiológicos en organismos en la superficie.",
+                "Toxicidad Vibrio Fisheri Fondo (15m)": "Toxicidad fisiológica en fondo a 15 horas: evalúa efectos fisiológicos en organismos en el fondo."
+            };
+            const parametrosDetectados = parametros.filter(param => param.value && param.value !== "");
+            if (parametrosDetectados.length > 0) {
                 definicionesHTML = '<ul style="text-align:left;">';
-                contaminantesDetectados.forEach(codigo => {
-                    const def = definicionContaminante(codigo);
+                parametrosDetectados.forEach(param => {
+                    const def = definicionesParametros[param.name] || '';
                     if (def) {
-                        definicionesHTML += `<li><strong>${codigo}:</strong> ${def}</li>`;
+                        definicionesHTML += `<li><strong>${param.name}:</strong> ${def}</li>`;
                     }
                 });
                 definicionesHTML += '</ul>';
             }
 
             let additionalHTML = `
-                <div class="mt-3">
-                    <h5><i class="fas fa-graduation-cap"></i> Información Educativa</h5>
-                    <p><strong>Contaminantes detectados:</strong> ${propiedades.CONTAMINANTES || 'Ninguno'}</p>
-                    ${definicionesHTML}
-                    <p><strong>Riesgos:</strong> ${riesgosCuerpoAgua(propiedades)}</p>
-                    <p><strong>Tecnologías recomendadas:</strong> ${tecnoCuerposAgua(propiedades)}</p>
-                    <p><strong>Importancia de conservación:</strong> ${conservacionCuerposAgua(tipo)}</p>
-                </div>
-            `;
-
-
+            <div class="mt-3">
+                <h5><i class="fas fa-graduation-cap"></i> Usos recomendados según calidad(Sin tratamiento)</h5>
+                <p><strong>Usos posibles:</strong> ${usosSegunCalidad(propiedades)}</p>
+                <h5><i class="fas fa-info-circle"></i> Usos recomendados tras tratamiento</h5>
+                <p><strong>Usos posibles tras tratamiento:</strong> ${usosTrasTratamiento(propiedades)}</p>
+                <h5 class="mt-3"><i class="fas fa-info-circle"></i> Información Educativa</h5>
+                <p><strong>Definicion de contaminantes detectados:</strong> </p>
+                ${definicionesHTML}
+                <p><strong>Riesgos:</strong> ${riesgosCuerpoAgua(propiedades)}</p>
+                <p><strong>Importancia de conservación:</strong> ${conservacionCuerposAgua(tipo)}</p>
+            </div>
+        `;
             document.getElementById('additionalInfo').innerHTML = additionalHTML;
-            
             document.getElementById('infoPanel').style.display = 'block';
             document.getElementById('infoPanel').scrollIntoView({ behavior: 'smooth' });
         }
@@ -654,20 +699,6 @@
                 riesgos.push('Posible toxicidad para organismos acuáticos');
             }
             return riesgos.length > 0 ? riesgos.join(', ') : 'Bajo riesgo según parámetros medidos';
-        }
-
-        function tecnoCuerposAgua(propiedades) {
-            const techs = [];
-            if (propiedades['COLI_FEC_NMP_100mL'] > 200) {
-                techs.push('Desinfección UV');
-            }
-            if (parseFloat(propiedades['DBO_mg/L'] || 0) > 30) {
-                techs.push('Reactores biológicos');
-            }
-            if (parseFloat(propiedades['SST_mg/L'] || 0) > 50) {
-                techs.push('Filtración multimedia');
-            }
-            return techs.length > 0 ? techs.join(', ') : 'Tratamiento convencional suficiente';
         }
 
         function conservacionCuerposAgua(tipo) {
@@ -816,6 +847,401 @@
                 map.setView([coords[1], coords[0]], 13);
             }
         }
+        // funcion para determinar los usos del agua según su calidad
+        // Esta función evalúa los parámetros de calidad del agua y devuelve los usos permitidos
+        function usosSegunCalidad(propiedades) {
+            let usos = [];
+            // Consumo humano
+            if (
+                parseFloat(propiedades['DBO_mg/L'] || 0) <= 5 &&
+                parseFloat(propiedades['DQO_mg/L'] || 0) <= 10 &&
+                parseFloat(propiedades['SST_mg/L'] || 0) <= 10 &&
+                parseFloat(propiedades['COLI_FEC_NMP_100mL'] || 0) <= 2 &&
+                parseFloat(propiedades['E_COLI_NMP_100mL'] || 0) <= 2
+            ) {
+                usos.push('Consumo humano (con tratamiento completo)');
+            }
+            // Riego agrícola
+            if (
+                parseFloat(propiedades['DBO_mg/L'] || 0) <= 30 &&
+                parseFloat(propiedades['SST_mg/L'] || 0) <= 50 &&
+                parseFloat(propiedades['COLI_FEC_NMP_100mL'] || 0) <= 1000
+            ) {
+                usos.push('Riego agrícola');
+            }
+            // Recreación
+            if (
+                parseFloat(propiedades['COLI_FEC_NMP_100mL'] || 0) <= 200 &&
+                parseFloat(propiedades['SST_mg/L'] || 0) <= 30
+            ) {
+                usos.push('Recreación (nado, pesca)');
+            }
+            // Industrial
+            if (
+                parseFloat(propiedades['SST_mg/L'] || 0) <= 100
+            ) {
+                usos.push('Usos industriales');
+            }
+            // Vida acuática
+            if (
+                parseFloat(propiedades['OD_PORC'] || 0) >= 80 &&
+                parseFloat(propiedades['TOX_D_48_UT'] || 0) <= 1
+            ) {
+                usos.push('Protección de vida acuática');
+            }
+            if (usos.length === 0) {
+                return 'No apta para usos directos. Requiere tratamiento avanzado.';
+            }
+            return usos.join(', ');
+        }
+
+
+        // función para generar recomendaciones de tratamiento según las propiedades del agua
+        // Esta función se basa en los niveles de calidad del agua 
+        // Se generan pasos de tratamiento específicos según los contaminantes y condiciones del agua
+        //usa dos niveles de detalle para cada contaminante
+        function generarRecomendacionesTratamiento(propiedades) {
+            let stepsHTML = '';
+
+            // SST (Sólidos Suspendidos Totales)
+            if (propiedades['CALIDAD_SST'] === "Fuertemente contaminada" || propiedades['CALIDAD_SST'] === "Contaminada") {
+                stepsHTML += `
+                    <div class="step-card">
+                        <div class="step-title">SST: Fuertemente contaminada y Contaminada</div>
+                        <div class="step-desc">
+                            <ul>
+                                <li>Coagulación/Floculación/Sedimentación optimizada, Filtración por membranas (Ultrafiltración, Ósmosis Inversa), posible pre-tratamiento físico-químico.</li>
+                                <li>Coagulación, Floculación, Sedimentación (intensiva), Filtración avanzada (membranas como Ultrafiltración), posible pre-tratamiento.</li>
+                            </ul>
+                            <span class="badge bg-danger">Calidad: Mala</span>
+                        </div>
+                    </div>
+                `;
+            } else if (propiedades['CALIDAD_SST'] === "Aceptable" || propiedades['CALIDAD_SST'] === "Buena calidad") {
+                stepsHTML += `
+                    <div class="step-card">
+                        <div class="step-title">SST: Aceptable y Buena calidad</div>
+                        <div class="step-desc">
+                            <ul>
+                                <li>Coagulación, Floculación, Sedimentación, Filtración (medios granulares), posible uso de membranas para mayor eficiencia.</li>
+                                <li>Coagulación, Floculación, Sedimentación, Filtración (medios granulares).  </li>
+                            </ul>
+                            <span class="badge bg-warning">Calidad: Moderada</span>
+                        </div>
+                    </div>
+                `;
+            } else if (propiedades['CALIDAD_SST'] === "Excelente") {
+                stepsHTML += `
+                    <div class="step-card">
+                        <div class="step-title">SST: Excelente</div>
+                        <div class="step-desc">
+                            <ul>
+                                <li>Filtración básica (ej. medios granulares) y desinfección.</li>
+                            </ul>
+                            <span class="badge bg-success">Calidad: Buena</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // DBO/DQO (Materia orgánica)
+            if (propiedades['CALIDAD_DBO'] === "Fuertemente contaminada" || propiedades['CALIDAD_DQO'] === "Fuertemente contaminada" 
+            || propiedades['CALIDAD_DBO'] === "Contaminada" || propiedades['CALIDAD_DQO'] === "Contaminada"){
+                stepsHTML += `
+                    <div class="step-card">
+                        <div class="step-title">Materia orgánica (DBO y DQO): Fuertemente contaminada y Contaminada</div>
+                        <div class="step-desc">
+                            <ul>
+                                <li>Tratamiento secundario (MBR), tratamiento terciario (carbón activado), oxidación avanzada (AOPs, ozonización, oxidación electroquímica, irradiación gamma), desmineralización.  </li>
+                                <li>Tratamiento secundario (biológico intensivo, MBR), tratamiento terciario (carbón activado), oxidación avanzada (AOPs, ozonización, oxidación electroquímica).</li>
+                            </ul>
+                            <span class="badge bg-danger">Calidad: Mala </span>
+                        </div>
+                    </div>
+                `;
+            } else if (propiedades['CALIDAD_DBO'] === "Aceptable" || propiedades['CALIDAD_DQO'] === "Aceptable" 
+            || propiedades['CALIDAD_DBO'] === "Buena calidad" || propiedades['CALIDAD_DQO'] === "Buena calidad") {
+                stepsHTML += `
+                    <div class="step-card">
+                        <div class="step-title">Materia orgánica (DBO y DQO): Aceptable y Buena calidad</div>
+                        <div class="step-desc">
+                            <ul>
+                                <li>Tratamiento secundario (biológico: biofiltración, aireación, estanques de oxidación, MBR), adsorción (carbón activado).</li>
+                                <li>Tratamiento primario (sedimentación), posible tratamiento secundario (biológico) si hay materia orgánica biodegradable. </li>
+                            </ul>
+                            <span class="badge bg-warning">Calidad: Moderada</span>
+                        </div>
+                    </div>
+                `;
+            }else if (propiedades['CALIDAD_DBO'] === "Excelente" || propiedades['CALIDAD_DQO'] === "Excelente" ) {
+                stepsHTML += `
+                    <div class="step-card">
+                        <div class="step-title">Materia orgánica: Moderada</div>
+                        <div class="step-desc">
+                            <ul>
+                                <li>No requiere tratamiento específico para DQO; solo los necesarios para otros parámetros (ej. desinfección).  </li>
+                            </ul>
+                            <span class="badge bg-success">Calidad: Buena</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Patógenos: Coliformes, E.Coli y Enterococos
+            if (
+                propiedades['CALIDAD_COLI_FEC'] === "Fuertemente contaminada" || propiedades['CALIDAD_E_COLI'] === "Fuertemente contaminada" ||
+                propiedades['CALIDAD_COLI_FEC'] === "Contaminada" || propiedades['CALIDAD_E_COLI'] === "Contaminada" ||
+                propiedades['CALIDAD_ENTEROC'] === "Fuertemente contaminada" || propiedades['CALIDAD_ENTEROC'] === "Contaminada"
+            )  {
+                stepsHTML += `
+                    <div class="step-card">
+                        <div class="step-title">Patógenos (Coliformes, E.Coli y Enterococos): Fuertemente Contaminada y Contaminada</div>
+                        <div class="step-desc">
+                            <ul>
+                                <li>Desinfección avanzada y robusta (múltiples etapas de desinfección, ozono + UV, cloración con control estricto), filtración por membranas (UF/OI) para remover microorganismos, tratamientos biológicos (plantas acuáticas). </li>
+                                <li>Desinfección avanzada y robusta (múltiples etapas de desinfección, ozono + UV, cloración con control estricto), filtración por membranas (UF/OI) para remover microorganismos, tratamientos biológicos (plantas acuáticas).  </li>
+                            </ul>
+                            <span class="badge bg-danger">Calidad: Mala</span>
+                        </div>
+                    </div>
+                `;
+            } else if (
+                propiedades['CALIDAD_COLI_FEC'] === "Aceptable" || propiedades['CALIDAD_E_COLI'] === "Aceptable" ||
+                propiedades['CALIDAD_COLI_FEC'] === "Buena calidad" || propiedades['CALIDAD_E_COLI'] === "Buena calidad" ||
+                propiedades['CALIDAD_ENTEROC'] === "Aceptable" || propiedades['CALIDAD_ENTEROC'] === "Buena calidad"
+            ) {
+                stepsHTML += `
+                    <div class="step-card">
+                        <div class="step-title">Patógenos (Coliformes, E.Coli y Enterococos): Aceptable y Buena calidad</div>
+                        <div class="step-desc">
+                            <ul>
+                                <li>Desinfección intensiva (Ozonización, UV con dosis altas, Cloración con monitoreo de residual), posible pre-tratamiento biológico (ej. plantas acuáticas).  </li>
+                                <li>Desinfección (Cloración, Ozonización, Luz Ultravioleta).  </li>
+                            </ul>
+                            <span class="badge bg-warning">Calidad: Moderada</span>
+                        </div>
+                    </div>
+                `;
+            } else if (
+                propiedades['CALIDAD_COLI_FEC'] === "Excelente" || propiedades['CALIDAD_E_COLI'] === "Excelente" ||
+                propiedades['CALIDAD_ENTEROC'] === "Excelente"
+            ) {
+                stepsHTML += `
+                    <div class="step-card">
+                        <div class="step-title">Patógenos (Coliformes, E.Coli y Enterococos): Excelente</div>
+                        <div class="step-desc">
+                            <ul>
+                                <li>Desinfección básica (Cloración, UV). </li>
+                            </ul>
+                            <span class="badge bg-success">Calidad: Buena</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Toxicidad: Dafnia Magna 48h,Dafnia Magna 48h Superficial, Dafnia Magna 48h Fondo, Vibrio Fischeri 15m, Toxicidad Fis Sup 15h, Toxicidad Fis Fon 15h
+            if (
+                propiedades['CALIDAD_TOX_D_48'] === "Toxicidad alta" || propiedades['CALIDAD_TOX_V_15'] === "Toxicidad alta" ||
+                propiedades['CALIDAD TOX_D_48_SUP'] === "Toxicidad alta" || propiedades['CALIDAD_TOX_D_48_FON'] === "Toxicidad alta" ||
+                propiedades['CALIDAD_TOX_FIS_SUP_15'] === "Toxicidad alta" || propiedades['CALIDAD_TOX_FIS_FON_15'] === "Toxicidad alta"
+            ) {
+                stepsHTML += `
+                    <div class="step-card">
+                        <div class="step-title">Toxicidad (Dafnia Magna 48h, Superficial, Fondo, Vibrio Fischeri 15m, Superficial 15m, Fondo 15m):Toxicidad Alta</div>
+                        <div class="step-desc">
+                            <ul>
+                                <li>Oxidación Avanzada (AOPs) intensiva, Ozonización, Oxidación Electroquímica, Irradiación Gamma; posiblemente múltiples etapas o técnicas especializadas.  </li>
+                            </ul>
+                            <span class="badge bg-danger">Calidad: Toxicidad alta</span>
+                        </div>
+                    </div>
+                `;
+            } else if (
+                propiedades['CALIDAD_TOX_D_48'] === "Toxicidad moderada" || propiedades['CALIDAD_TOX_V_15'] === "Toxicidad moderada" ||
+                propiedades['CALIDAD TOX_D_48_SUP'] === "Toxicidad moderada" || propiedades['CALIDAD_TOX_D_48_FON'] === "Toxicidad moderada" ||
+                propiedades['CALIDAD_TOX_FIS_SUP_15'] === "Toxicidad moderada" || propiedades['CALIDAD_TOX_FIS_FON_15'] === "Toxicidad moderada"
+            ) {
+                stepsHTML += `
+                    <div class="step-card">
+                        <div class="step-title">Toxicidad (Dafnia Magna 48h, Superficial, Fondo, Vibrio Fischeri 15m, Superficial 15m, Fondo 15m): Toxicidad moderada</div>
+                        <div class="step-desc">
+                            <ul>
+                                <li>Oxidación Avanzada (AOPs), Ozonización, Oxidación Electroquímica, Irradiación Gamma.  </li>
+                            </ul>
+                            <span class="badge bg-warning">Calidad: Toxicidad moderada</span>
+                        </div>
+                    </div>
+                `;
+            } else if (
+                propiedades['CALIDAD_TOX_D_48'] === "Toxicidad baja" || propiedades['CALIDAD_TOX_V_15'] === "Toxicidad baja" ||
+                propiedades['CALIDAD TOX_D_48_SUP'] === "Toxicidad baja" || propiedades['CALIDAD_TOX_D_48_FON'] === "Toxicidad baja" ||
+                propiedades['CALIDAD_TOX_FIS_SUP_15'] === "Toxicidad baja" || propiedades['CALIDAD_TOX_FIS_FON_15'] === "Toxicidad baja"
+            ) {
+                stepsHTML += `
+                    <div class="step-card">
+                        <div class="step-title">Toxicidad (Dafnia Magna 48h, Superficial, Fondo, Vibrio Fischeri 15m, Superficial 15m, Fondo 15m): Toxicidad baja</div>
+                        <div class="step-desc">
+                            <ul>
+                                <li>Filtración y monitoreo.</li>
+                                <li>Oxidación Avanzada (AOPs), Ozonización, Oxidación Electroquímica, Irradiación Gamma.  </li>
+                            </ul>
+                            <span class="badge bg-warning">Calidad: Toxicidad baja</span>
+                        </div>
+                    </div>
+                `;
+            } else if (
+                propiedades['CALIDAD_TOX_D_48'] === "No Toxico" || propiedades['CALIDAD_TOX_V_15'] === "No Toxico" ||
+                propiedades['CALIDAD TOX_D_48_SUP'] === "No Toxico" || propiedades['CALIDAD_TOX_D_48_FON'] === "No Toxico" ||
+                propiedades['CALIDAD_TOX_FIS_SUP_15'] === "No Toxico" || propiedades['CALIDAD_TOX_FIS_FON_15'] === "No Toxico"
+            ) {
+                stepsHTML += `
+                    <div class="step-card">
+                        <div class="step-title">Toxicidad (Dafnia Magna 48h, Superficial, Fondo, Vibrio Fischeri 15m, Superficial 15m, Fondo 15m): Sin toxicidad significativa</div>
+                        <div class="step-desc">
+                            <ul>
+                                <li>Tratamiento convencional suficiente.</li>
+                                <li>No requiere tratamiento específico para toxicidad; solo los necesarios para otros parámetros (ej. desinfección para potabilización).  </li>
+                            </ul>
+                            <span class="badge bg-success">Calidad: No tóxico</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Oxígeno Disuelto: Oxigeno Disuelto, Oxígeno Disuelto Superficial, Oxígeno Disuelto Medio, Oxígeno Disuelto Fondo
+            if (
+                propiedades['CALIDAD_OD_PORC'] === "Contaminada" || propiedades['CALIDAD_OD_PORC_SUP"'] === "Contaminada" ||
+                propiedades['CALIDAD_OD_PORC_MED'] === "Contaminada" || propiedades['CALIDAD_OD_PORC_FON'] === "Contaminada"
+            ) {
+                stepsHTML += `
+                    <div class="step-card">
+                        <div class="step-title">Oxígeno Disuelto(Superficial, Medio, Fondo): Contaminada</div>
+                        <div class="step-desc">
+                            <ul>
+                                <li>Tratamientos biológicos intensivos (MBR), aireación forzada, oxidación avanzada para reducir carga orgánica. </li>
+                            </ul>
+                            <span class="badge bg-danger">Calidad: Mala</span>
+                        </div>
+                    </div>
+                `;
+            } else if (
+                propiedades['CALIDAD_OD_PORC'] === "Aceptable" || propiedades['CALIDAD_OD_PORC_SUP"'] === "Aceptable" ||
+                propiedades['CALIDAD_OD_PORC_MED'] === "Aceptable" || propiedades['CALIDAD_OD_PORC_FON'] === "Aceptable"
+            ) {
+                stepsHTML += `
+                    <div class="step-card">
+                        <div class="step-title">Oxígeno Disuelto(Superficial, Medio, Fondo): Aceptable</div>
+                        <div class="step-desc">
+                            <ul>
+                                <li>Oxidación Avanzada (AOPs), Ozonización, Oxidación Electroquímica, Irradiación Gamma.  </li>
+                            </ul>
+                            <span class="badge bg-warning">Calidad: Moderada</span>
+                        </div>
+                    </div>
+                `;
+            } else if (
+                propiedades['CALIDAD_OD_PORC'] === "Buena calidad" || propiedades['CALIDAD_OD_PORC_SUP"'] === "Buena calidad" ||
+                propiedades['CALIDAD_OD_PORC_MED'] === "Buena calidad" || propiedades['CALIDAD_OD_PORC_FON'] === "Buena calidad"
+            ) {
+                stepsHTML += `
+                    <div class="step-card">
+                        <div class="step-title">Oxígeno Disuelto(Superficial, Medio, Fondo): Buena Calidad</div>
+                        <div class="step-desc">
+                            <ul>
+                                <li>Los tratamientos que reducen la materia orgánica (DBO/DQO) y la carga microbiana mejorarán el OD (ej. tratamientos biológicos, aireación).  </li>
+                            </ul>
+                            <span class="badge bg-success">Calidad: Moderada</span>
+                        </div>
+                    </div>
+                `;
+            } else if (
+                propiedades['CALIDAD_OD_PORC'] === "Excelente" || propiedades['CALIDAD_OD_PORC_SUP'] === "Excelente" ||
+                propiedades['CALIDAD_OD_PORC_MED'] === "Excelente" || propiedades['CALIDAD_OD_PORC_FON'] === "Excelente"
+            ) {
+                stepsHTML += `
+                    <div class="step-card">
+                        <div class="step-title">Oxígeno Disuelto(Superficial, Medio, Fondo): Excelente</div>
+                        <div class="step-desc">
+                            <ul>
+                                <li>No requiere tratamiento específico para OD; solo los necesarios para otros parámetros.  </li>
+                            </ul>
+                            <span class="badge bg-success">Calidad: Buena</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (stepsHTML === '') {
+                stepsHTML = '<p>El agua cumple con los parámetros básicos. Se recomienda filtración y desinfección estándar antes de cualquier uso.</p>';
+            }
+            return stepsHTML;
+        }
+
+        // Usos recomendados tras tratamiento según rangos(usando campo de calidad de cada contaminante) y criterios de la tabla PDF
+        function usosTrasTratamiento(propiedades) {
+            let usos = [];
+            // Si tras tratamiento cumple con todos los límites, se puede usar para consumo humano
+            if (
+                propiedades['CALIDAD_DBO'] === "Excelente" &&
+                propiedades['CALIDAD_DQO'] === "Excelente" &&
+                propiedades['CALIDAD_SST'] === "Excelente" &&
+                propiedades['CALIDAD_COLI_FEC'] === "Excelente" &&
+                propiedades['CALIDAD_E_COLI'] === "Excelente" &&
+                (propiedades['CALIDAD_TOX_D_48'] === "No Toxico" || propiedades['CALIDAD_TOX_V_15'] === "No Toxico")
+            ) {
+                usos.push('Consumo humano');
+            }
+            // Riego agrícola
+            if (
+                ["Excelente", "Buena calidad", "Aceptable"].includes(propiedades['CALIDAD_DBO']) &&
+                ["Excelente", "Buena calidad", "Aceptable"].includes(propiedades['CALIDAD_SST']) &&
+                ["Excelente", "Buena calidad", "Aceptable"].includes(propiedades['CALIDAD_COLI_FEC'])
+            ) {
+                usos.push('Riego agrícola');
+            }
+            // Recreación
+            if (
+                ["Excelente", "Buena"].includes(propiedades['CALIDAD_COLI_FEC']) &&
+                ["Excelente", "Buena"].includes(propiedades['CALIDAD_SST'])
+            ) {
+                usos.push('Recreación (nado, pesca)');
+            }
+            // Industrial
+            if (
+                ["Excelente", "Buena", "Moderada"].includes(propiedades['CALIDAD_SST'])
+            ) {
+                usos.push('Usos industriales');
+            }
+            // Vida acuática
+            if (
+                propiedades['CALIDAD_OD_PORC'] === "Excelente" &&
+                (propiedades['CALIDAD_TOX_D_48'] === "No Toxico" || propiedades['CALIDAD_TOX_V_15'] === "No Toxico")
+            ) {
+                usos.push('Protección de vida acuática');
+            }
+            // Si hay toxicidad alta, solo uso industrial tras tratamiento avanzado
+            if (propiedades['CALIDAD_TOX_D_48'] === "Toxicidad alta" || propiedades['CALIDAD_TOX_V_15'] === "Toxicidad alta") {
+                usos = ['Solo uso industrial tras tratamiento avanzado'];
+            }
+            if (usos.length === 0) {
+                return 'No apta para usos directos. Requiere tratamiento avanzado.';
+            }
+            return usos.join(', ');
+        }
+    </script>
+    <script>
+    document.getElementById('menuToggle').onclick = function() {
+        var menu = document.getElementById('mobileMenu');
+        menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+    };
+    // Opcional: cerrar menú al hacer clic fuera
+    document.addEventListener('click', function(e) {
+        var menu = document.getElementById('mobileMenu');
+        var toggle = document.getElementById('menuToggle');
+        if (menu.style.display === 'block' && !menu.contains(e.target) && e.target !== toggle) {
+            menu.style.display = 'none';
+        }
+    });
     </script>
 </body>
 </html>

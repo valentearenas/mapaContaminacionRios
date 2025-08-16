@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Educación sobre Calidad del Agua | AquaGuard</title>
+    <!--Font Awesome 6-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
             margin: 0;
@@ -141,6 +143,54 @@
                 width: 80px;
             }
         }
+        .nav-mobile {
+            display: none;
+            position: relative;
+        }
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 2rem;
+            padding: 10px 20px;
+            cursor: pointer;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .menu-toggle i {
+            font-size: 2.2rem;
+            pointer-events: none; /* El clic pasa al botón */
+        }
+        .mobile-menu-list {
+            display: none;
+            position: absolute;
+            right: 10px;
+            top: 50px;
+            background: #0077b6;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            flex-direction: column;
+            min-width: 160px;
+            z-index: 99;
+        }
+        .mobile-menu-list a {
+            color: #fff;
+            padding: 14px 18px;
+            text-decoration: none;
+            border-bottom: 1px solid #90e0ef;
+            display: block;
+            font-weight: 600;
+        }
+        .mobile-menu-list a:last-child {
+            border-bottom: none;
+        }
+        @media (max-width: 700px) {
+            .nav-desktop { display: none; }
+            .nav-mobile { display: block; }
+        }
     </style>
 </head>
 <body>
@@ -149,7 +199,7 @@
             <img src="logo.png" alt="AquaGuard Logo" />
             <span style="font-size:1.3rem; font-weight:700; letter-spacing:1px; color:#90e0ef; text-shadow:0 2px 8px #0077b688;">AquaGuard</span>
         </div>
-        <nav>
+        <nav class="nav-desktop">
             <ul>
                 <li><a href="index.html">Hogar</a></li>
                 <li><a href="mapaContaminacion.html">Mapa</a></li>
@@ -158,6 +208,18 @@
                 <li><a href="juego.html">Juego</a></li>
             </ul>
         </nav>
+        <div class="nav-mobile">
+            <button id="menuToggle" class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div id="mobileMenu" class="mobile-menu-list">
+                <a href="index.html">Hogar</a>
+                <a href="mapaContaminacion.html">Mapa</a>
+                <a href="contenidoEducativo.html">Educación</a>
+                <a href="comoUsar.html">Cómo Usar</a>
+                <a href="juego.html">Juego</a>
+            </div>
+        </div>
     </div>
     <div class="educativo-container">
         <h1>Información Educativa sobre Calidad del Agua</h1>
@@ -244,5 +306,19 @@
             © 2025 AquaGuard. Todos los derechos reservados.
         </p>
     </div>
+    <script>
+    document.getElementById('menuToggle').onclick = function() {
+        var menu = document.getElementById('mobileMenu');
+        menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+    };
+    // Opcional: cerrar menú al hacer clic fuera
+    document.addEventListener('click', function(e) {
+        var menu = document.getElementById('mobileMenu');
+        var toggle = document.getElementById('menuToggle');
+        if (menu.style.display === 'block' && !menu.contains(e.target) && e.target !== toggle) {
+            menu.style.display = 'none';
+        }
+    });
+    </script>
 </body>
 </html>
